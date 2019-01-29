@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.trip.base.mapper.NewsPageMapper">
+  <resultMap id="BaseResultMap" type="cn.wolfcode.trip.base.domain.NewsPage">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="subTitle" jdbcType="VARCHAR" property="subTitle" />
+    <result column="coverUrl" jdbcType="VARCHAR" property="coverUrl" />
+    <result column="createTime" jdbcType="DATE" property="createTime" />
+    <association property="content" javaType="newsPageContent" columnPrefix="nc_" >
+        <id column="s_id" property="id"/>
+        <result column="content" property="content"/>
+    </association>
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from newspage
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.wolfcode.trip.base.domain.NewsPage" useGeneratedKeys="true">
+    insert into newspage (title, subTitle, coverUrl,
+      createTime)
+    values (#{title,jdbcType=VARCHAR}, #{subTitle,jdbcType=VARCHAR}, #{coverUrl,jdbcType=VARCHAR},
+      #{createTime,jdbcType=DATE})
+  </insert>
+  <insert id="insertadd">
+      INSERT INTO newspagecontent (id,content) VALUE (#{id},#{content})
+  </insert>
+  <update id="updateByPrimaryKey" >
+    update newspage
+    set title = #{title,jdbcType=VARCHAR},
+      subTitle = #{subTitle,jdbcType=VARCHAR},
+      coverUrl = #{coverUrl,jdbcType=VARCHAR},
+      createTime = #{createTime,jdbcType=DATE}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updatePrimaryById" parameterType="newsPageContent">
+    update newspagecontent set content=#{content} where id=#{id}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select id, title, subTitle, coverUrl, createTime
+    from newspage
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, title, subTitle, coverUrl, createTime
+    from newspage
+  </select>
+    <select id="query" resultMap="BaseResultMap" >
+      select id, title, subTitle, coverUrl, createTime
+      from newspage
+    </select>
+  <select id="selectNewsPageContent" resultMap="BaseResultMap">
+      select n.id, n.title, n.subTitle, n.coverUrl, n.createTime,nc.id nc_id,nc.content nc_content
+      from newspage n
+      JOIN newsPageContent nc ON n.id=nc.id
+      WHERE n.id=#{id}
+  </select>
+
+  <!--查日报总数-->
+  <select id="selectForList" resultMap="BaseResultMap">
+    select id, title, subTitle, coverUrl, createTime
+    from newspage
+    <where>
+      <if test="keyword!=null">
+        AND title LIKE CONCAT('%',#{keyword},'%')
+      </if>
+    </where>
+  </select>
+</mapper>

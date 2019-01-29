@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <title>移动端密码输入框</title>
+    <script src="/js/passwordBox.min.js"></script>
+
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/loading.css">
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/loading.js"></script>
+    <script>
+
+        window.onload = function () {
+            /**
+             * init传入参数依次是：正确密码(传空时不对比输入是否正确),密码键盘背景，标题，副标题
+             * */
+            PwdBox.init('123456', 'img/pwd_keyboard.png', '请输入支付密码', '安全支付环境，请放心使用！');
+            /**
+             *res格式：{status:'true或false',password:'用户输入的密码'}
+             *
+             */
+            PwdBox.show(function (res) {
+                if (res.status) {
+                    //重置输入
+                    alert('密码正确');
+                    //关闭并重置密码输入
+                    PwdBox.reset();
+                } else {
+                    /*alert(JSON.stringify(arguments));*/
+                    loading8();
+
+                }
+            });
+        };
+
+
+        function loading8() {
+            $('body').loading({
+                loadingWidth: 220,
+                title: '提示',
+                name: 'test',
+                titleColor: '#fff',
+                discColor: '#EDEEE9',
+                discription: '支付中...',
+                direction: 'column',
+                type: 'origin',
+                originBg: '#ECCFBB',
+                originDivWidth: 40,
+                originDivHeight: 40,
+                originWidth: 6,
+                originHeight: 6,
+                smallLoading: false,
+                loadingBg: 'rgba(56,43,14,0.8)',
+                loadingMaskBg: 'rgba(66,66,66,0.2)'
+            });
+
+            setTimeout(function () {
+                window.location.href = "http://localhost/mine/paySuccess.html"
+            }, 3000);
+        }
+
+    </script>
+</head>
+<body>
+
+</body>
+
+
+<style>
+    body, html {
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+</style>
+</html>

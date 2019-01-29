@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>消息</title>
+    <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" name="viewport">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="black" name="apple-mobile-web-app-status-bar-style">
+    <meta content="telephone=no" name="format-detection">
+    <script src="/js/jquery/jquery.min.js"></script>
+    <script src="/js/plugins/jrender/jrender.min.js"></script>
+    <link href="/css/css_likeHistory.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/js/plugins/dialog2/dialog.css"/>
+    <script src="/js/plugins/dialog2/dialog.min.js"></script>
+    <link rel="stylesheet" href="/css/font/css/font-awesome.min.css">
+    <style>
+        .dot {
+            color: red;
+        }
+    </style>
+
+</head>
+<body>
+<script>
+    $(function () {
+        // var authorId = JSON.parse(sessionStorage.getItem("user")).id;
+
+        var currentPage = 1;//当前页
+        var pages;//总页数
+        var histories = [];//定义一个数组用来接收每次分页时的数据
+        function query() {
+            $.get('/fabulous/fabulousHistory', {pageSize: 10,currentPage:currentPage}, function (data) {
+                console.log(data);
+                $.merge(histories, data.list);
+                var json = {
+                    list: histories
+                };
+                $(".userGood").renderValues(json, {
+                    getHref: function (item, value) {
+                        var url = $(item).data("href");
+                        $(item).attr("href", url + value);
+                    },
+                    getType: function (item, value) {
+                        if (value == 2) {
+                            $(item).html("赞了你的游记");
+                        } else if (value == 4) {
+                            $(item).html("赞了你的朋友圈");
+                        }
+                    },
+                    getShow: function (item, value) {
+                        var type = $(item).closest('.showContent').data("type");
+                        if (type == 2) {
+                            $(item).attr("href", "/mine/editTravels.html?id=" + value);
+                        } else if (type == 4) {
+                            $(item).attr("href", "/mine/friendster.html");
+                        }
+                    },
+                    getDisplay: function (item, value) {
+                        if (value == 0) {
+                            $(item).css("display", "none");
+                        }
+                    }
+                });
+                pages = data.pages;
+
+                // 点击时,把对应的数据状态改为0(已查看)
+                $('.delete').click(function () {
+                    var id = $(this).data("id");
+                    var type = $(this).closest('.showContent').data("type");
+                    $.ajax({
+                        url: '/fabulous/changeState',
+                        type: 'patch',
+                        data: {
+                            id: id,
+                            type: type
+                        }
+                    });
+                });
+                currentPage = currentPage + 1;
+            });
+        }
+
+        //默认查询第一页
+        query();
+
+        //监听滚动事件,当滚动条发生变化时触发
+        var c = 1;
+        $('.userGood').scroll(function () {
+            //document滚上去的高度+手机窗口的高度 >= 整个文档的高度
+            if ($(this).scrollTop() + $(this).height()  >= c * $(window).height()) {
+                if (currentPage <= pages) {
+                    query();
+                    c ++;
+                } else {
+                    $(document).dialog({
+                        type: 'notice',
+                        content: '<span class="info-text">亲,已经到底了!</span>',
+                        autoClose: 1000,
+                        position: 'bottom'
+                    });
+                }
+            }
+        });
+    });
+</script>
+<section class="aui-flexView">
+    <header class="aui-navBar aui-navBar-fixed b-line">
+        <a href="/mine/message.html" class="aui-navBar-item">
+            <i class="icon icon-return"></i>
+        </a>
+        <div class="aui-center">
+            <span class="aui-center-title">赞我的</span>
+        </div>
+        <a href="javascript:;" class="aui-navBar-item">
+        </a>
+    </header>
+    <section class="aui-scrollView userGood">
+        <div class="aui-list-box" render-loop="list">
+            <div class="aui-flex">
+                <a data-href="/userProfiles.html?id=" render-key="list.visitor_id" render-fun="getHref">
+                    <div class="aui-flex-logo">
+                        <img render-src="list.visitor_headImgUrl" alt="">
+                    </div>
+                </a>
+                <div class="aui-flex-box showContent" render-attr="data-type=list.type">
+                    <a render-key="list.hrefId" render-fun="getShow" class="delete" render-attr="data-id=list.hrefId">
+                        <h2>
+                            <span render-html="list.visitor_nickName"></span>
+                            <span style="font-size: 12px" render-key="list.type" render-fun="getType"></span>
+                            <i class="fa fa-circle dot" aria-hidden="true" render-key="list.state"
+                               render-fun="getDisplay"></i>
+                        </h2>
+                        <h3 render-html="list.show_content"></h3>
+                    </a>
+                </div>
+                </span>
+            </div>
+        </div>
+    </section>
+</section>
+</body>
+</html>

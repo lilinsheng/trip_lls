@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>编辑游记</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="/js/bootstrap-4.1.1-dist/css/bootstrap.min.css">
+    <script src="/js/jquery/jquery.min.js"></script>
+    <script src="/js/bootstrap-4.1.1-dist/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/css/font/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/css/reset.css"/>
+    <link rel="stylesheet" href="/css/editTravels.css"/>
+    <script src="/js/plugins/jrender/jrender.min.js"></script>
+    <link rel="stylesheet" href="/js/plugins/dialog2/dialog.css" />
+    <script src="/js/plugins/dialog2/dialog.min.js"></script>
+    <script src="/js/plugins/form/jquery.form.js"></script>
+    <script src="/js/plugins/eleditor/Eleditor.min.js"></script>
+    <script src="/js/plugins/eleditor/webuploader.min.js"></script>
+    <script src="/js/My97DatePicker/WdatePicker.js"></script>
+    <script src="/js/common.js"></script>
+
+
+    <script>
+        $(function () {
+
+            //获取所有地区
+            $.get("/regions",function (data) {
+                var str;
+                $.each(data,function (index,ele) {
+                    str=str+"<option value='"+ele.id+"'>"+ele.name+"</option>";
+                })
+                $('#detailForm [name="place.id"]').html(str);
+                //获取请求的参数
+                var params = getParams();
+                if (params.id){
+                    $('input[name=_method]').val("put");
+                    $('#detailForm').attr("action","/travels/"+params.id);
+                    $.get('/travels/'+params.id,function (data) {
+                        console.log(data);
+                        $('.travels').renderValues(data);
+                    });
+                }
+            });
+
+
+
+            //富文本编辑框
+            var Edr = new Eleditor({
+                el: '#contentEditor',
+                upload:{
+                    server: '/images',
+                },
+            });
+
+            //选择背景图片
+            $('#changeBtn').click(function () {
+                $('#imageForm [name=file]').click();
+            });
+
+            //提交修改背景
+            $('#imageForm [name=file]').change(function () {
+                $('#imageForm').ajaxSubmit(function (data) {
+                    if (data.status==1){
+                        //设置到页面显示
+                        $('#coverUrl').attr("src",data.url);
+                    }
+                });
+            });
+
+
+
+            var state;
+
+            //修改表单提交方式
+            $('#detailForm').ajaxForm({
+                beforeSubmit:function (arr) {
+                    arr.push({"name":"coverUrl","value":$('#coverUrl').attr("src")});
+                    arr.push({"name":"title","value":$('#title').val()});
+                    arr.push({"name":"state","value":state});
+                    arr.push({"name":"travelContent.content","value":Edr.getContent()});
+                },
+                success:function (data) {
+                    if (data.success){
+                        window.location.href="/fere.html";
+                    }
+                }
+            });
+
+            //保存到草稿
+            $('#save').click(function () {
+                state = 0;
+                $('#detailForm').submit();
+                sessionStorage.removeItem("travel");
+            });
+
+            //发布游记
+            $('#release').click(function () {
+                state=1;
+                $('#detailForm').submit();
+                sessionStorage.removeItem("travel");
+            });
+        });
+    </script>
+
+</head>
+
+<body>
+<div class="search-head">
+    <div class="row nav-search">
+        <div class="col-2">
+            <a href="javascript:window.history.go(-1);">
+                <span><i class="fa fa-times"></i></span>
+            </a>
+        </div>
+        <div class="col-5"></div>
+        <div class="col" style="text-align: right;">
+            <i class="fa fa-floppy-o fg-fw" id="save"><span>保存</span></i>
+            <i class="fa fa-check" id="release"><span>发布</span></i>
+        </div>
+    </div>
+</div>
+
+<div class="travels form-group">
+    <div class="cover">
+        <img render-src="coverUrl" id="coverUrl" width="100%" height="200px" />
+
+        <button type="button" class="btn" id="changeBtn">
+            <i class="fa fa-pencil-square-o"></i>
+            <small>更换封面</small>
+        </button>
+    </div>
+
+    <form action="/images" method="post" id="imageForm" enctype="multipart/form-data">
+        <input type="file" style="display: none" name="file">
+    </form>
+
+    <div class="title">
+        <input render-value="title" class="form-control" id="title"  placeholder="请输入标题"/>
+    </div>
+    <h6 href="#">点击文章内容即可编辑</h6>
+    <div render-html="travelContent.content" id="contentEditor" >
+    </div>
+    <hr/>
+    <div class="container">
+        <form id="detailForm" method="post" action="/travels">
+            <input type="hidden" name="_method" />
+            <input render-value="id" type="hidden" name="id" />
+            <label>出行时间:</label>
+            <input render-value="travelTime" type="text" name="travelTime"  class="form-control" readonly="readonly" onclick="WdatePicker()">
+            <label>出行天数:</label>
+            <input render-value="days" type="number" name="days" class="form-control">
+            <label>参与人物:</label>
+            <select class="c-select form-control" name="person" render-value="person">
+                <option value="1" selected>一个人的旅行</option>
+                <option value="2">和父母</option>
+                <option value="3">和朋友</option>
+                <option value="4">和同事</option>
+                <option value="5">和爱人</option>
+                <option value="6">和其他</option>
+            </select>
+            <label>人均费用:</label>
+            <input type="text" name="perExpends" render-value="perExpends" class="form-control">
+
+            <label>旅游地点:</label>
+            <select class="form-control" name="place.id" render-value="place.id">
+            </select>
+
+           <!-- <div class="form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="checkbox"  name="isPublic" render-attr="checked=isPublic"
+                    >是否公开
+                </label>
+            </div>-->
+
+        </form>
+    </div>
+
+    <hr/>
+
+</div>
+
+
+</body>
+
+</html>

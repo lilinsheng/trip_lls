@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.trip.base.mapper.QuestionMapper">
+  <resultMap id="BaseResultMap" type="cn.wolfcode.trip.base.domain.Question">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="problem" jdbcType="VARCHAR" property="problem" />
+    <result column="coverUrl" jdbcType="VARCHAR" property="coverUrl" />
+    <result column="trouble" jdbcType="VARCHAR" property="trouble" />
+    <result column="createTime" property="createTime" />
+    <result column="m" property="answerNum"/>
+    <association property="user" javaType="User" columnPrefix="u_">
+      <id column="id" property="id"/>
+      <result column="nickName" property="nickName"/>
+      <result column="headImgUrl" property="headImgUrl"/>
+      <result column="place" property="place"/>
+    </association>
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from question
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.wolfcode.trip.base.domain.Question" useGeneratedKeys="true">
+    insert into question (problem, coverUrl, trouble
+      )
+    values (#{problem,jdbcType=VARCHAR}, #{coverUrl,jdbcType=VARCHAR}, #{trouble,jdbcType=VARCHAR}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="cn.wolfcode.trip.base.domain.Question">
+    update question
+    set problem = #{problem,jdbcType=VARCHAR},
+      coverUrl = #{coverUrl,jdbcType=VARCHAR},
+      trouble = #{trouble,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey"  resultMap="BaseResultMap">
+    select id, problem, coverUrl, trouble
+    from question
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, problem, coverUrl, trouble
+    from question
+  </select>
+    <select id="query" resultMap="BaseResultMap">
+      select q.id, q.problem, q.coverUrl, q.trouble,q.createTime,q1.m,
+      u.id u_id,u.nickName u_nickName, u.headImgUrl u_headImgUrl,u.place u_place
+      from question q
+      JOIN user u ON u.id=q.author_id
+      LEFT JOIN
+      (SELECT qc.question_id,count(qc.id) m FROM questionandcomment qc GROUP  BY qc.question_id) q1
+      ON q.id = q1.question_id
+    </select>
+    <select id="selectCommentById" resultMap="BaseResultMap">
+      select q.id, q.problem, q.coverUrl, q.trouble,q.createTime,
+      u.id u_id,u.nickName u_nickName,u.headImgUrl u_headImgUrl,u.place u_place
+      from question q
+      JOIN user u ON u.id=q.id
+      where q.id=#{id}
+    </select>
+</mapper>

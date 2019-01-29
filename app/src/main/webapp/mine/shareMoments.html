@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <title>发表朋友圈</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="/js/bootstrap-4.1.1-dist/css/bootstrap.min.css">
+    <script src="/js/jquery/jquery.min.js"></script>
+    <script src="/js/bootstrap-4.1.1-dist/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/css/font/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/css/reset.css"/>
+    <link rel="stylesheet" href="/css/myStrategyComment.css"/>
+    <script src="/js/plugins/jrender/jrender.min.js"></script>
+    <link rel="stylesheet" href="/js/plugins/dialog2/dialog.css"/>
+    <script src="/js/plugins/dialog2/dialog.min.js"></script>
+    <script src="/js/plugins/form/jquery.form.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        $(function () {
+            jQuery.ajaxSettings.traditional = true;
+
+
+            var rect;
+            //图片数组
+            var imgUrls = "";
+
+            //图片上传
+            $('.imgs .rect').click(function () {
+                rect = this;
+                $('#imageForm input').click();
+            });
+
+            $('#imageForm input').change(function () {
+                if ($(this).val()) {
+                    $('#imageForm').ajaxSubmit(function (data) {
+                        if (data.status == 1) {
+                            //设置到页面显示
+                            $(rect).html('<img src="' + data.url + '" />')
+                            imgUrls += data.url + ";";
+                        }
+                    })
+                }
+            })
+
+            //发表朋友圈
+            $('#submitBtn').click(function () {
+
+                var user = sessionStorage.getItem("user");
+                user = JSON.parse(user);
+
+                var data = {
+                    content: $('textarea[name=content]').val(),
+                    imgUrls: imgUrls.substring(0, imgUrls.length - 1),
+                    'user.id': user.id
+                }
+
+                $.ajax({
+                    data: data,
+                    url: '/friends',
+                    type: "post",
+                    success: function (data) {
+                        window.location.href = "/mine/friendster.html?id=" + user.id
+                    }
+                })
+            });
+        })
+    </script>
+</head>
+
+<!--设置背景图片-->
+<style>
+    body {
+        background: url("/img/0.0.jpg");
+        width: 100%;
+    }
+</style>
+
+
+<body>
+
+<div class="search-head">
+    <div class="row nav-search">
+        <div class="col">
+            <a href="javascript:window.history.go(-1)">
+                <span><i class="fa fa-chevron-left"></i></span>
+            </a>
+
+        </div>
+        <div class="col">
+            <span>发表朋友圈</span>
+        </div>
+        <div class="col"></div>
+    </div>
+</div>
+
+<div class="comment">
+    <textarea name="content" class="form-control" rows="5" placeholder="这一刻你的想法..."></textarea>
+</div>
+
+<form action="/images" method="post" id="imageForm" enctype="multipart/form-data">
+    <input type="file" style="display: none" name="file">
+</form>
+
+<div class="container imgs ">
+    <p>上传图片</p>
+
+    <div class="row">
+        <div class="col-3 rect">
+            <span>上传</span>
+        </div>
+        <div class="col-3 rect">
+            <span>上传</span>
+        </div>
+        <div class="col-3 rect">
+            <span>上传</span>
+        </div>
+        <div class="col-3 rect">
+            <span>上传</span>
+        </div>
+        <div class="col-3 rect">
+            <span>上传</span>
+        </div>
+        <div class="col-3 rect">
+            <span>上传</span>
+        </div>
+    </div>
+</div>
+
+</div>
+
+
+<div class="operation">
+    <button class="btn" onclick="window.history.go(-1)">放弃发表</button>
+    <button class="btn" id="submitBtn">发布</button>
+</div>
+
+
+</body>
+
+
+</html>

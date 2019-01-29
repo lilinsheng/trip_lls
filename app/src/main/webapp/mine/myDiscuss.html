@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>消息</title>
+    <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" name="viewport">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="black" name="apple-mobile-web-app-status-bar-style">
+    <meta content="telephone=no" name="format-detection">
+    <script src="/js/jquery/jquery.min.js"></script>
+    <link href="/message_files/style.css" rel="stylesheet" type="text/css"/>
+    <script type="text/javascript" src="/message_files/jquery-3.31.min.js"></script>
+    <script type="text/javascript" src="/message_files/tab.js"></script>
+    <link href="/css/css_likeHistory.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/js/plugins/dialog2/dialog.css">
+    <script src="/js/plugins/dialog2/dialog.min.js"></script>
+    <script src="/js/plugins/jrender/jrender.min.js"></script>
+    <link rel="stylesheet" href="/css/font/css/font-awesome.min.css">
+    <style>
+        .dot {
+            color: red;
+        }
+    </style>
+
+    <script>
+        //封装时间格式
+        function format(time, format) {
+            var t = new Date(time);
+            var tf = function (i) {
+                return (i < 10 ? '0' : '') + i
+            };
+            return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (a) {
+                switch (a) {
+                    case 'yyyy':
+                        return tf(t.getFullYear());
+                        break;
+                    case 'MM':
+                        return tf(t.getMonth() + 1);
+                        break;
+                    case 'mm':
+                        return tf(t.getMinutes());
+                        break;
+                    case 'dd':
+                        return tf(t.getDate());
+                        break;
+                    case 'HH':
+                        return tf(t.getHours());
+                        break;
+                    case 'ss':
+                        return tf(t.getSeconds());
+                        break;
+                }
+            })
+        }
+
+        $(function () {
+            var state = 1;
+            var flag = 1; // 判断当前是游记还是朋友圈
+            var currentPage = 1;//当前页
+            var pages;//总页数
+            var histories = [];//定义一个数组用来接收每次分页时的数据
+            // 查询我的游记
+            function query() {
+                $.get('/discuss/'+state, {currentPage:currentPage,pageSize:8}, function (data) {
+                    console.log(data);
+                    $.merge(histories, data.list);
+                    var json = {
+                        list: histories
+                    };
+                    $("#aui-scrollView1").renderValues(json, {
+                        getHref: function (item, value) {
+                            var url = $(item).data("href");
+                            $(item).attr("href", url + value);
+                        },
+                        getTitle: function (item, value) {
+                            $(item).html("所属游记:" + value);
+                        },
+                        getDisplay: function (item, value) {
+                            if (value == 0) {
+                                $(item).css("display", "none");
+                            }
+                        }
+                    });
+                    pages = data.pages;
+
+                    // 点击时,把对应的数据状态改为0(已查看)
+                    $('.deleteTravel').click(function () {
+                        var id = $(this).data("id");
+                        $.ajax({
+                            url: '/comment/changeTravelState',
+                            type: 'patch',
+                            data: {
+                                id: id
+                            }
+                        })
+                    });
+                    currentPage++;
+                });
+            }
+            //默认查询第一页
+            query();
+
+
+            // 查询我的朋友圈
+            function queryFriend() {
+                $.get('/discuss/'+state, {currentPage:currentPage,pageSize:8}, function (data) {
+                    console.log(data);
+                    $.merge(histories, data.list);
+                    var json = {
+                        list: histories
+                    };
+                    $('#aui-scrollView2').renderValues(json, {
+                        getHref: function (item, value) {
+                            var url = $(item).data("href");
+                            $(item).attr("href", url + value);
+                        },
+                        getDate:function (item, value) {
+                            $(item).html(format(value, "yyyy-MM-dd HH:mm:ss"));
+                        }
+                    });
+                    // 点击时,把对应的数据状态改为0(已查看)
+                    $('.deleteFriend').click(function () {
+                        var id = $(this).data("id");
+                        $.ajax({
+                            url: '/comment/changeFriendState',
+                            type: 'patch',
+                            data: {
+                                id: id
+                            }
+                        })
+                    });
+                });
+                currentPage++;
+            }
+
+            // 点击查询朋友圈的数据
+            $('#friend').click(function () {
+                currentPage = 1;
+                histories = [];
+                state = 2;
+                queryFriend();
+            });
+
+            // 点击查询游记的数据
+            $('#travel').click(function () {
+                currentPage = 1;
+                histories = [];
+                state = 1;
+                query();
+            });
+
+            //监听滚动事件,当滚动条发生变化时触发
+            $('.scroll').scroll(function () {
+                //document滚上去的高度+手机窗口的高度 >= 整个文档的高度
+                if ($(this).scrollTop() + $(this).height() -$('.head').height() - 5 >=   $('.bbb').height()) {
+                    if (currentPage <= pages) {
+                        if (flag == 1) {
+                            query();
+                        }else if(flag == 2){
+                            queryFriend();
+                        }
+                    } else {
+                        $(document).dialog({
+                            type: 'notice',
+                            content: '<span class="info-text">亲,已经到底了!</span>',
+                            autoClose: 1000,
+                            position: 'bottom'
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+
+<section class="aui-flexView aaa">
+    <header class="aui-navBar aui-navBar-fixed b-line head">
+        <a href="/mine/message.html" class="aui-navBar-item">
+            <i class="icon icon-return"></i>
+        </a>
+        <div class="aui-center">
+            <span class="aui-center-title">我的评论</span>
+        </div>
+        <a href="javascript:;" class="aui-navBar-item">
+        </a>
+    </header>
+
+    <section class="aui-scrollView scroll">
+        <div class="aui-tab" data-ydui-tab>
+            <ul class="tab-nav">
+                <li class="tab-nav-item tab-active">
+                    <a href="javascript:;" id="travel">游记</a>
+                </li>
+                <li class="tab-nav-item">
+                    <a href="javascript:;" id="friend">朋友圈</a>
+                </li>
+            </ul>
+            <div class="tab-panel bbb showTravel">
+                <div class="tab-panel-item tab-active">
+                    <div id="aui-scrollView1">
+                        <div class="aui-list-box" render-loop="list">
+                            <div class="aui-flex">
+                                <a render-key="list.travel.id" render-fun="getHref" data-href="/travelContent.html?id=">
+                                    <div class="aui-flex-logo1">
+                                        <img render-src="list.travel.coverUrl">
+                                    </div>
+                                </a>
+                                <div class="aui-flex-box">
+                                    <a render-key="list.travel.id" render-fun="getHref"
+                                       data-href="/mine/travelComment.html?id="
+                                       class="deleteTravel" render-attr="data-id=list.id">
+                                        <h2>
+                                            <span render-html="list.user_nickName"></span>
+                                            <span style="font-size: 12px">评论的游记</span>
+                                        </h2>
+                                        <h3 render-html="list.travel.title">
+                                        </h3>
+                                        <p >评论的内容：<span render-html="list.content"></span>
+                                        </p>
+                                    </a>
+                                </div>
+                                <span class="aui-flex-add" render-html="list.createTime"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-panel-item">
+                    <div id="aui-scrollView2">
+                        <div class="aui-list-box" render-loop="list">
+                            <div class="aui-flex">
+                                <a render-key="list.u_id" render-fun="getHref" data-href="/userProfiles.html?id=">
+                                    <div class="aui-flex-logo">
+                                        <img render-src="list.u_headImgUrl">
+                                    </div>
+                                </a>
+                                <div class="aui-flex-box">
+                                    <a render-key="list.f_id" render-fun="getHref"
+                                       data-href="/mine/friendster.html?id="
+                                       class="deleteFriend" render-attr="data-id=list.id">
+                                        <h2>
+                                            <span style="font-size: 12px">评论的朋友圈:</span>
+                                            <span render-html="list.u_nickName"></span>
+                                        </h2>
+
+
+                                        评论的内容：<span render-html="list.fm_content"></span>
+                                    </a>
+                                </div>
+                                <span class="aui-flex-add" render-key="list.fm_createTime" render-fun="getDate"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </section>
+</section>
+
+<script>
+    /**
+     * @return {string}
+     */
+    function CurentTime(date) {
+        var year = date.getFullYear();
+        var month = date.getMonth() + 1;
+        var day = date.getDate();
+        var hh = date.getHours();
+        var mm = date.getMinutes();
+        var clock = year + "-";
+        if (month < 10)
+            clock += "0";
+        clock += month + "-";
+        if (day < 10)
+            clock += "0";
+        clock += day + " ";
+        if (hh < 10)
+            clock += "0";
+        clock += hh + ":";
+        if (mm < 10) clock += '0';
+        clock += mm;
+        return clock;
+    }
+</script>
+
+</body>
+</html>

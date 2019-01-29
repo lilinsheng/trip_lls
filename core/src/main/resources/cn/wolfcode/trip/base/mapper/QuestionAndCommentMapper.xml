@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.trip.base.mapper.QuestionAndCommentMapper">
+  <resultMap id="BaseResultMap" type="cn.wolfcode.trip.base.domain.QuestionAndComment">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="content" jdbcType="VARCHAR" property="content" />
+    <result column="question_id" jdbcType="BIGINT" property="question.id" />
+    <result column="answerTime"  property="answerTime" />
+    <association property="user" javaType="User" columnPrefix="u_">
+      <id column="id" property="id"/>
+      <result column="nickName" property="nickName"/>
+      <result column="headImgUrl" property="headImgUrl"/>
+    </association>
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from questionAndComment
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.wolfcode.trip.base.domain.QuestionAndComment" useGeneratedKeys="true">
+    insert into questionAndComment (content, question_id,
+      )
+    values (#{content,jdbcType=VARCHAR}, #{question.id,jdbcType=BIGINT},
+      )
+  </insert>
+  <insert id="add" keyColumn="id" keyProperty="id" parameterType="cn.wolfcode.trip.base.domain.QuestionAndComment" useGeneratedKeys="true">
+    insert into questionAndComment (content, question_id,answer_id
+      )
+    values (#{content,jdbcType=VARCHAR}, #{question.id,jdbcType=BIGINT},#{user.id,jdbcType=BIGINT}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="cn.wolfcode.trip.base.domain.QuestionAndComment">
+    update questionAndComment
+    set content = #{content,jdbcType=VARCHAR},
+      question_id = #{questionId.id,jdbcType=BIGINT},
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select id, content, question_id, answerTime,answer_id
+    from questionAndComment
+    where answer_id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, content, question_id
+    from questionAndComment
+  </select>
+  <select id="selectComment" resultMap="BaseResultMap">
+    select qd.id, qd.content, qd.question_id,qd.answerTime,u.id u_id,
+    u.nickName u_nickName,u.headImgUrl u_headImgUrl
+    FROM questionandcomment qd
+    JOIN user u ON u.id=qd.answer_id
+    where qd.question_id=#{id}
+  </select>
+  <select id="selectCount" resultType="int">
+      select count(*)
+      FROM questionandcomment
+      where question_id=#{id}
+  </select>
+
+</mapper>

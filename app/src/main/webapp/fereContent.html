@@ -1,0 +1,283 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title></title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no,minimal-ui,viewport-fit=cover"/>
+    <meta name="copyright" content="Copyright (c) 2006-2018 Mafengwo."/>
+    <meta name="format-detection" content="telephone=no,address=no"/>
+    <meta name="referrer" content="always"/>
+
+    <script type="text/javascript">
+        window.Env = {
+            "CNZZID": 30081550,
+            "IS_MOBILE": true,
+            "tid": 2194171,
+            "WWW_HOST": "www.mafengwo.cn",
+            "IMG_HOST": "images.mafengwo.net",
+            "P_HOST": "passport.mafengwo.cn",
+            "P_HTTP": "https:\/\/passport.mafengwo.cn",
+            "PAGELET_HTTP": "https:\/\/pagelet.mafengwo.cn",
+            "JS_HOST": "js.mafengwo.net",
+            "UID": 0,
+            "CSTK": "118f98d3c0cd26e75a33b7ed676ecafd_a4b42f08d74009311a6a223836a9cc6f",
+            "GOOGLE_MAP_KEY": "AIzaSyD-Su0x_rPy1xehlMBcMyTqWkU49Bk53nQ",
+            "TONGJI_HOST": "tongji.mafengwo.cn"
+        };
+    </script>
+    <link href="css/mobile+css+ui^yvw^1526627473.css" rel="stylesheet" type="text/css"/>
+    <script src="/js/jquery/jquery.min.js"></script>
+    <script src="/js/plugins/jrender/jrender.min.js"></script>
+    <script src="/js/common.js"></script>
+    <link rel="stylesheet" href="/js/plugins/dialog2/dialog.css"/>
+    <script src="/js/plugins/dialog2/dialog.min.js"></script>
+
+    <script>
+        $(function () {
+            var fereId = getParams().fereId;
+            $.get("fereContents/user", {fereId: fereId}, function (user) {
+                $(".va-middle").renderValues(user)
+                $("#skipUser").click(function () {
+                    window.location.href = "userProfiles.html?id=" + user.id;
+                });
+            })
+            $.get("fereContents", {fereId: fereId}, function (fere) {
+                $(".container").renderValues(fere)
+            })
+            $.get("fereContents/" + fereId, function (fereContent) {
+                $(".container").renderValues(fereContent);
+            })
+
+            $("#skip").click(function () {
+                window.location.href = "/mine/apply.html?id=" + fereId;
+            });
+            //点击进行关注
+            var user = JSON.parse(sessionStorage.getItem("user"));
+
+            function getFous() {
+                $.get("/feres/" + user.id + "/" + fereId, function (data) {
+                    if (data === 1) {
+                        $("#focus").html("已关注");
+                    } else {
+                        $("#focus").html("关注");
+                    }
+                });
+            }
+
+            getFocusAndJoinNum();
+
+            //获取关注和加入数量
+            function getFocusAndJoinNum() {
+                $.get("/feres/" + fereId, function (data) {
+                    $("#focusNum").html(data.focusNum);
+                    $("#joinNum").html(data.joinNum);
+                    $("#focusPeople").html("已关注（" + data.focusNum + "人）");
+                    //渲染已关注用户的头像
+                    $(".focusUsers").renderValues(data);
+                    $(".skipUser").each(function (index, ele) {
+                        $(ele).click(function () {
+                            window.location.href = "userProfiles.html?id=" + $(this).data("uid");
+                        });
+                    });
+                });
+            }
+
+            if (user) {
+                getFous();
+                $("#focus").click(function () {
+                    $.get("/feres/" + user.id + "/" + fereId, function (data) {
+                        if (data === 1) {
+                            $(document).dialog({
+                                type: 'confirm',
+                                closeBtnShow: true,
+                                content: '亲,您已经关注过此条结伴信息了.您想要取消关注么?',
+                                onClickConfirmBtn: function () {
+                                    $.ajax({
+                                        type: "DELETE",
+                                        url: "/feres/" + user.id + "/" + fereId,
+                                        success: function () {
+                                            $(document).dialog({
+                                                type: 'notice',
+                                                infoText: '亲,已经取消关注了哦^_^!',
+                                                autoClose: 1000,
+                                                position: 'bottom'  // center: 居中; bottom: 底部
+                                            });
+                                            getFous();
+                                            getFocusAndJoinNum();
+                                        }
+                                    })
+                                },
+                                onClickCancelBtn: function () {
+
+                                },
+                                onClickCloseBtn: function () {
+
+                                }
+                            });
+                        } else {
+                            $.post("/feres/" + user.id + "/" + fereId, function (data) {
+                                if (data.success) {
+                                    $(document).dialog({
+                                        type: 'notice',
+                                        infoText: '亲,关注成功了哟^_^!',
+                                        autoClose: 1000,
+                                        position: 'bottom'  // center: 居中; bottom: 底部
+                                    });
+                                    getFous();
+                                    getFocusAndJoinNum();
+                                }
+                            });
+                        }
+                    });
+                });
+            } else {
+                $("#focus").click(function () {
+                    $(document).dialog({
+                        type: 'notice',
+                        infoText: '亲,要先登录才能关注哦^_^!',
+                        autoClose: 1000,
+                        position: 'bottom'  // center: 居中; bottom: 底部
+                    });
+                });
+            }
+
+            //评论功能
+            function getComments() {
+                $.get("/fereContents/" + fereId + "/comment", function (data) {
+                    var temp=' <div class="tit _j_comment_total">留言（'+data.length+'条）</div>\n' +
+                        '        <div class="add-comment _j_comment_tpl">\n' +
+                        '            <textarea rows="4" class="_j_comment" id="text"></textarea>\n' +
+                        '            <div class="btn-block _j_publish_comment" data-tid="2194171"><a role="button" id="commentBtn">发表留言</a></div>\n' +
+                        '        </div>';
+                    for(var item in data){
+                        temp+=' <div class="_j_comment_li">\n' +
+                            '            <div class="item clearfix">\n' +
+                            '                <div class="user-bar clearfix">\n' +
+                            '                    <a class="author" href="userProfiles.html?id='+data[item].user.id+'">\n' +
+                            '                        <img src="'+data[item].user.headImgUrl+'">\n' +
+                            '                        <span>'+data[item].user.nickName+'</span><br>\n' +
+                            '                        <span class="level">Lv 2</span>\n' +
+                            '                    </a>\n' +
+                            '                    <span class="time">'+data[item].createTime+'</span>\n' +
+                            '                    <a class="btn-reply _j_replay" data-cid="28979761" data-name="陈秀珍" data-uid="77960730">回复</a>\n' +
+                            '                </div>\n' +
+                            '                <div class="content">'+data[item].content+'</div>\n' +
+                            '            </div>\n' +
+                            '        </div>'
+                    }
+                    $(".comments").html(temp);
+                    if (user) {
+                        $("#commentBtn").click(function () {
+                            var comment = $("#text").val();
+                            $.post("fereContents", {"user.id": user.id, "fere.id": fereId, "content": comment}, function (data) {
+                                if (data.success) {
+                                    $(document).dialog({
+                                        type: 'notice',
+                                        infoText: '亲,评论成功^_^!',
+                                        autoClose: 1000,
+                                        position: 'bottom'  // center: 居中; bottom: 底部
+                                    });
+                                    $("#text").val("");
+                                    getComments();
+                                }
+                            });
+                        });
+                    }else{
+                        $("#commentBtn").click(function () {
+                            $(document).dialog({
+                                type: 'notice',
+                                infoText: '亲,要先登录才能评论哦^_^!',
+                                autoClose: 1000,
+                                position: 'bottom'  // center: 居中; bottom: 底部
+                            });
+                        });
+                    }
+                });
+            }
+            getComments();
+        })
+    </script>
+</head>
+<body>
+<div id="pos38"></div>
+<header class="head2home">
+    <!--<a href="/"><img src="/img/"></a>-->
+
+</header>
+<div class="rBtn" >
+    <a href="/" class="home">
+        <h3 >首页</h3>
+    </a>
+
+</div>
+
+<link href="css/together.css" rel="stylesheet" type="text/css"/>
+
+
+<input type="hidden" class="_j_my_id" data-myid=""/>
+<section class="container">
+    <div class="detail-head">
+        <img src="picture/topnum-bg.jpg">
+        <div class="cover-info">
+            <div class="va-wrap">
+                <div class="va-middle">
+                    <h3 class="text-shadow" render-html="title"></h3>
+                    <div class="user">
+                        <span class="avatar">
+                            <a id="skipUser">
+                                <img render-src="headImgUrl"></a></span>
+                        <span class="name" render-html="nickName"></span>
+                        <span class="level">Lv.13</span>
+                        <span class="gender male"></span><br>
+                        <span class="time" render-html="goTime"></span>
+                    </div>
+                </div>
+                <ul class="nums va-middle text-shadow">
+                    <li>关注<em class="_j_care_count" id="focusNum"></em></li>
+                    <li>报名<em id="joinNum"></em></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <ul class="base-info clearfix">
+        <li class="date">出行时间<span>2018-11-24</span></li>
+        <li class="days">出行天数<span render-html="days"></span></li>
+        <li class="contact">联系方式
+            <span>
+                             报名后可见
+                    </span>
+        </li>
+    </ul>
+    <div class="detail-info" render-html="content">
+        <div class="btn-block">
+            <a class="_j_not_login">马上报名</a>
+        </div>
+    </div>
+    <dl class="user-list _j_care_info">
+        <dt id="focusPeople">已关注（5人）</dt>
+        <dd class="focusUsers">
+            <ul style="width:250px" render-loop="users">
+                <li class="_j_set_width"><a class="skipUser" render-attr="data-uid=users.id">
+                    <img render-src="users.headImgUrl">
+                </a></li>
+            </ul>
+        </dd>
+    </dl>
+    <div class="streak"></div>
+    <div class="comments _j_comment_list">
+
+    </div>
+    <div class="fixed-btm">
+        <div class="btn-group">
+            <a class="btn-attention _j_not_login" id="focus">关注</a>
+            <span class="space"></span>
+            <a class="btn-join _j_not_login" id="skip">我要报名</a>
+        </div>
+    </div>
+</section>
+
+
+</body>
+</html>

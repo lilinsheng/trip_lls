@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.trip.base.mapper.FriendMapper">
+  <resultMap id="BaseResultMap" type="cn.wolfcode.trip.base.domain.Friend">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="imgUrls" jdbcType="VARCHAR" property="imgUrls" />
+    <result column="content" jdbcType="VARCHAR" property="content" />
+    <result column="createDate" jdbcType="TIMESTAMP" property="createDate" />
+      <result property="isFabulousName" column="isFabulousName"></result>
+      <association property="user" javaType="user" columnPrefix="u_">
+        <id column="id" property="id"/>
+        <result column="coverImgUrl" property="coverImgUrl"/>
+        <result column="nickName" property="nickName"/>
+        <result column="headImgUrl" property="headImgUrl"/>
+    </association>
+    <collection property="friendComments" ofType="FriendComment" select="cn.wolfcode.trip.base.mapper.FriendCommentMapper.selectByOneParentId" column="id"></collection>
+    <collection property="fabulous" select="cn.wolfcode.trip.base.mapper.UserMapper.selectFabulousByFriendId" column="id"></collection>
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    DELETE FROM friend
+    WHERE id = #{id,jdbcType=BIGINT}
+  </delete>
+
+  <!-- 移除朋友圈关注 -->
+  <delete id="deleteFriendRelation">
+    DELETE FROM friend_fabulous
+    WHERE user_id = #{userId} AND friend_id=#{friendId}
+  </delete>
+
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.wolfcode.trip.base.domain.Friend" useGeneratedKeys="true">
+    INSERT INTO friend (imgUrls, content, user_id,
+      createDate)
+    VALUES (#{imgUrls,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, #{user.id,jdbcType=BIGINT},
+      #{createDate,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="cn.wolfcode.trip.base.domain.Friend">
+    UPDATE friend
+    SET imgUrls = #{imgUrls,jdbcType=VARCHAR},
+      content = #{content,jdbcType=VARCHAR},
+      user_id = #{user.id,jdbcType=BIGINT},
+      createDate = #{createDate,jdbcType=TIMESTAMP}
+    WHERE id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    SELECT id, imgUrls, content, user_id u_id, createDate
+    FROM friend
+    WHERE id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    SELECT id, imgUrls, content, user_id, createDate
+    FROM friend
+  </select>
+
+  <!-- 查询好友动态 -->
+  <select id="selectFriend" resultMap="BaseResultMap">
+    SELECT f.id, f.imgUrls, f.content, f.user_id, f.createDate,
+    u.coverImgUrl u_coverImgUrl,u.headImgUrl u_headImgUrl,
+    u.nickName u_nickName,u.id u_id,
+	ff.friend_id isFabulousName
+    FROM friend f JOIN friend_relation fr ON f.user_id = fr.focus_id
+    JOIN user u ON fr.focus_id=u.id
+		LEFT JOIN friend_fabulous ff ON f.user_id = #{id} AND ff.friend_id = f.id
+    WHERE fr.attention_id=#{id}
+    UNION
+    SELECT f.id, f.imgUrls, f.content, f.user_id, f.createDate,
+    u.coverImgUrl u_coverImgUrl,u.headImgUrl u_headImgUrl,
+    u.nickName u_nickName,u.id u_id,
+	ff.friend_id isFabulousName
+    FROM friend f
+    JOIN user u ON f.user_id=u.id
+		LEFT JOIN friend_fabulous ff ON f.user_id = #{id} AND ff.friend_id = f.id
+    WHERE f.user_id=#{id}
+  </select>
+
+  <!-- 获取该篇朋友圈的所有关注人 -->
+  <select id="selectFabulous" resultType="user">
+    SELECT u.id,u.nickName
+    FROM user u JOIN friend_fabulous ff ON u.id = ff.user_id
+    WHERE friend_id = #{friendId}
+  </select>
+
+  <!-- 朋友圈关注 -->
+  <insert id="insertFriendRelation">
+    INSERT INTO friend_fabulous (user_id, friend_id, state, createTime)
+    VALUES (#{userId},#{friendId},1,NOW())
+  </insert>
+
+  <!-- 查看是否关注该朋友圈 -->
+  <!--<select id="isFabulousFriend" resultType="object">
+    SELECT user_id,friend_id FROM friend_fabulous
+    WHERE user_id=#{userId} AND friend_id=#{friendId}
+  </select>-->
+</mapper>

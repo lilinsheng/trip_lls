@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+    <meta http-equiv="Pragma" content="no-cache"/>
+    <meta http-equiv="Expires" content="0"/>
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="/css/area.css"/>
+    <link href="/css/style.css" rel="stylesheet" type="text/css"/>
+
+    <script type="text/javascript" src="/js/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/time.js"></script>
+    <script src="/js/My97DatePicker/WdatePicker.js"></script>
+
+    <script src="/js/plugins/form/jquery.form.js"></script>
+    <script src="/js/plugins/jrender/jrender.min.js"></script>
+    <script src="/js/common.js"></script>
+    <link rel="stylesheet" href="/css/font/css/font-awesome.min.css"/>
+
+    <script>
+        $(function () {
+            var params = getParams();
+            console.log(params.id);
+
+            if (params.id) {
+                $.get('/scenics/' + params.id, function (data) {
+                    console.log(data);
+                    $(".imgUrl").attr("src", data.imgUrl);
+                    $(".title").html(data.title);
+                    $(".price").html(data.price + "元");
+                    var ticketId=data.id;
+                    $('.button-pay').click(function () {
+                        $.ajax({
+                            data:{
+                                date:$('.aui-sides-form [name=date]').val(),
+                                touristName:$('.aui-sides-form [name=name]').val(),
+                                address:$('#expressArea').val(),
+                                phone:$('.aui-sides-form [name=phone]').val(),
+                                "ticket.id":ticketId
+                            },
+                            url:"/orders",
+                            type:"post",
+                            success:function (data) {
+                                window.location.href="/mine/payoff.html";
+                            }
+                        })
+
+                    });
+                })
+            }
+        })
+
+    </script>
+
+</head>
+<body>
+<div class="search-head">
+    <div class="row nav-search">
+        <div class="col" >
+            <a href="/ticketsMall.html" >
+                <span style="margin-right: 120px;"><i class="fa fa-chevron-left"></i></span>
+            </a>
+            <span >我的订单</span>
+        </div>
+        <div class="col"></div>
+    </div>
+</div>
+</header>
+
+<section class="aui-flexView">
+    <section class="aui-scrollView">
+        <div class="aui-sides-head ">
+            <div class="aui-flex scenic">
+                <div class="aui-sides-img">
+                    <img class="imgUrl" alt="">
+                </div>
+                <div class="aui-flex-box">
+                    <h2>骡窝窝官方平台</h2>
+                    <br/>
+                    <p class="title">广州长隆野生动物世界</p>
+                    <br/>
+                    <span style="font-size: 20px" class="price">454元</span>
+                </div>
+            </div>
+        </div>
+        <div class="aui-sides-form">
+            <a href="javascript:;" class="aui-flex b-line">
+                <div class="aui-sides-form-text">
+                    <h2>游玩日期:</h2>
+                </div>
+                <div class="aui-flex-box">
+                    <label class="cell-right ">
+                        <input type="text" class="aui-code-line-input" name="date" value="" id="date"
+                               autocomplete="off" readonly="readonly" placeholder="请选择日期" onclick="WdatePicker()"/>
+                    </label>
+                </div>
+            </a>
+            <a href="javascript:;" class="aui-flex b-line">
+                <div class="aui-sides-form-text">
+                    <h2>游客姓名:</h2>
+                </div>
+                <div class="aui-flex-box">
+                    <label class="cell-right cell-arrow">
+                        <input type="text" class="aui-code-line-input" name="name" value="" id="name"
+                               autocomplete="off" placeholder="请输入姓名"/>
+                    </label>
+                </div>
+            </a>
+
+
+            <div class="ui-form-item ui-border-b">
+                <a href="javascript:;" class="aui-flex b-line">
+                    <div class="aui-sides-form-text">
+                        <h2>现居地址:</h2>
+                    </div>
+                    <div class="ui-select">
+                        <input id="expressArea" class="aui-code-line-input" data-name="custUa" data-required="true"
+                               data-label="单位地址" autocomplete="off" placeholder="选择省市区" readonly
+                               style="padding-left:0;">
+                    </div>
+                </a>
+                <div class="browser">
+
+                    <!--选择地区弹层-->
+                    <section id="areaLayer" class="express-area-box">
+                        <header>
+                            <h3>选择省市区</h3>
+                            <div class="selet-area-wrap">
+                                <p><span class="one"></span></p>
+                                <p><span class="two"></span></p>
+                                <p><span class="three"></span></p>
+                            </div>
+                            <div class="hot-city">
+                                <p>热门城市</p>
+                                <ul>
+                                    <li onClick="selectPP(0,1)">北京</li>
+                                    <li onClick="selectPP(10,1)">上海</li>
+                                    <li onClick="quickselectC(18,0)">广州</li>
+                                    <li onClick="quickselectC(18,1)">深圳</li>
+                                    <li onClick="quickselectC(12,0)">杭州</li>
+                                    <li onClick="quickselectC(11,0)">南京</li>
+                                    <li onClick="quickselectC(11,4)">苏州</li>
+                                    <li onClick="selectPP(1,1)">天津</li>
+                                    <li onClick="quickselectC(16,0)">武汉</li>
+                                    <li onClick="quickselectC(17,0)">长沙</li>
+                                    <li onClick="selectPP(21,1)">重庆</li>
+                                    <li onClick="quickselectC(22,0)">成都</li>
+                                </ul>
+                                <p>选择省份/地区</p>
+                            </div>
+                            <a id="backUp" class="back" href="javascript:void(0)" title="返回"></a>
+                            <a id="closeArea" class="close" href="javascript:void(0)" title="关闭"></a>
+                        </header>
+                        <article id="areaBox">
+                            <ul id="areaList" class="area-list"></ul>
+                        </article>
+                    </section>
+                    <!--遮罩层-->
+                    <div id="areaMask" class="mask"></div>
+                </div>
+            </div>
+
+            <a href="javascript:;" class="aui-flex b-line">
+                <div class="aui-sides-form-text">
+                    <h2>手机号码:</h2>
+                </div>
+                <div class="aui-flex-box">
+                    <label class="cell-right ">
+                        <input type="text" class="aui-code-line-input" name="phone" value="" id="phone1"
+                               autocomplete="off" placeholder="请输入手机号码"/>
+                    </label>
+                </div>
+            </a>
+
+            <!--<a href="javascript:;" class="aui-flex b-line">
+                <div class="aui-sides-form-text">
+                    <h2>验&nbsp;证&nbsp;&nbsp;码:</h2>
+                </div>
+                <div class="aui-flex-box">
+                    <label class="cell-right ">
+                        <input id="code1" type="text" class="aui-code-line-input" autocomplete="off"
+                               placeholder="请输入验证码"/>
+                        <input id="btnSendCode1" type="button" class="aui-btn-default" value="获取验证码"
+                               onClick="sendMessage1()"/>
+                    </label>
+                </div>
+            </a>-->
+            <div class="pay-btn">
+                <a class="aui-sides-button button-pay" style="display: block; text-align: center;">购买</a>
+            </div>
+        </div>
+    </section>
+</section>
+
+<script type="text/javascript" charset="utf-8">
+    $(function () {
+        $(".aui-code-line-input").addClear();
+    });
+</script>
+</body>
+<script src="/js/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="/js/jquery.area.js" type="text/javascript" charset="utf-8"></script>
+</html>

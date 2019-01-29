@@ -1,0 +1,402 @@
+﻿<!DOCTYPE html>
+<html style="font-size: 50px;">
+<head>
+    <meta charset="UTF-8">
+    <meta content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width" name="viewport">
+    <meta id="LOCATION" name="location" content="province=;city=;coord=,">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Cache-Control" content="no-transform"/>
+    <meta http-equiv="Cache-Control" content="no-siteapp"/>
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="expires" content="0">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="applicable-device" content="mobile">
+    <meta name="fragment" content="!"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="applicable-device" content="mobile">
+
+    <script src="/js/jquery/jquery.min.js"></script>
+    <script src="/js/plugins/form/jquery.form.js"></script>
+    <script src="/js/plugins/jrender/jrender.min.js"></script>
+    <script src="/js/common.js"></script>
+    <title id="_title">景点门票</title>
+    <meta id="_keywords" name="Keywords" content="景点门票">
+    <meta id="_description" name="Description" content="骡窝窝无线官网:提供全国旅游景点门票手机预订,打折门票团购服务,更有点评赢取积分，现金返现等各种优惠!">
+    <!--请求id-->
+    <meta name="_reqId" content="56df0f50-ff6c-11e8-a950-a9ec3c59fc16">
+    <!-- UC强制全屏 -->
+    <meta name="full-screen" content="yes">
+
+    <!-- QQ强制全屏 -->
+    <meta name="x5-fullscreen" content="true">
+
+    <!-- UC应用模式 -->
+    <meta name="browsermode" content="application">
+
+    <!-- QQ应用模式 -->
+    <meta name="x5-page-mode" content="app">
+    <link rel="shortcut icon" href="//pics.lvjs.com.cn/mobile/img/lvmama/icon/favicon.ico" type="image/x-icon">
+
+    <link rel="stylesheet" href="css/common-3.1.css">
+    <link rel="stylesheet" href="css/tickethome.css">
+
+    <script>
+        $(function () {
+            $.get("/scenics", function (data) {
+                $("#tickets").renderValues(data, {
+                    getHref: getHref
+                });
+            })
+        });
+
+
+    </script>
+</head>
+<body>
+<script type="text/javascript" src="js/public-1.7.min.js "></script>
+<script async defer type="text/javascript" src="js/tingyun-rum.js"></script>
+<script type="text/javascript" src="js/statisticsutil-3.12.min.js"></script>
+
+<div id="container"></div>
+<div id="cityPicker"></div>
+<div id="tpl" class="container home-page pdt18 dbCMT50">
+    <div class="ticket-header search-header headFixed">
+        <div class="search">
+            <a lv-on="click:cmMainSearch($event)">
+                <input type="text" readonly="readonly" disabled="disabled" placeholder="景点名称/城市/主题">
+            </a>
+        </div>
+        <div class="address" lv-on="click:openCityPicker()">
+            <span lv-text="stationName">广东</span>
+        </div>
+    </div>
+    <div class="banner">
+        <div id='mySwipe' class='swipe'>
+            <div class="swipe-wrap guangg">
+                <div class="swiper-slide">
+                    <a href="//m.lvmama.com/ticket/piao-182882" lv-on="click:cmBanner($event)" ztName="广州长隆欢乐世界"
+                       index="0">
+                        <img src="picture/1543484294_71002.jpg" alt=""/>
+                    </a>
+                </div>
+                <div class="swiper-slide">
+                    <a href="//m.lvmama.com/ticket/piao-183630" lv-on="click:cmBanner($event)" ztName="珠海长隆海洋王国"
+                       index="1">
+                        <img src="picture/1544064098_19554.jpg" alt=""/>
+                    </a>
+                </div>
+                <div class="swiper-slide">
+                    <a href="//m.lvmama.com/ticket/piao-181554" lv-on="click:cmBanner($event)" ztName="广州塔" index="2">
+                        <img src="picture/1544161696_64330.jpg" alt=""/>
+                    </a>
+                </div>
+                <div class="swiper-slide">
+                    <a href="//m.lvmama.com/ticket/piao-338763" lv-on="click:cmBanner($event)" ztName="增城三英温泉"
+                       index="3">
+                        <img src="picture/1541659569_59704.jpg" alt=""/>
+                    </a>
+                </div>
+                <div class="swiper-slide">
+                    <a href="//m.lvmama.com/ticket/piao-172238" lv-on="click:cmBanner($event)" ztName="川岛风情" index="4">
+                        <img src="picture/1542276700_42627.jpg" alt=""/>
+                    </a>
+                </div>
+                <div class="swiper-slide">
+                    <a href="//m.lvmama.com/ticket/piao-1613325" lv-on="click:cmBanner($event)" ztName="正佳自然科学博物馆"
+                       index="5">
+                        <img src="picture/1543806115_75187.jpg" alt=""/>
+                    </a>
+                </div>
+            </div>
+            <div class="bannerPagination pagination"></div>
+        </div>
+    </div>
+
+    <div class="hotProduct">
+        <div class="hotTitle">
+            <span>人气必玩</span>
+            <a href="//m.lvmama.com/mainSearch/preSearch.htm?homeSearch&#x3D;12&amp;keyword&#x3D;广东">
+                <span>广东全部景点</span>
+            </a>
+        </div>
+        <div class="custom">
+            <div class="prd-list">
+                <div class="huadong">
+                    <a class="cmAddClick" lv-on="click:cmHotProduct($event)" href="//m.lvmama.com/ticket/piao-182882"
+                       index="0" productName="广州长隆欢乐世界">
+                        <div class="img-wrap">
+                            <div class="prd-pic"
+                                 style="background-image: url(images/08fcb678-1045-4281-82b3-7bfa0b88ea07_480_320.jpg)"></div>
+                            <div class="price">今日订</div>
+                        </div>
+                        <div class="prd-info">
+                            <p>广州长隆欢乐世界</p>
+                            <div class="prd-pri">
+                                <span><i>¥</i>119<i>起</i></span>
+                            </div>
+                        </div>
+                    </a>
+                    <a class="cmAddClick" lv-on="click:cmHotProduct($event)" href="//m.lvmama.com/ticket/piao-616068"
+                       index="1" productName="正佳极地海洋世界">
+                        <div class="img-wrap">
+                            <div class="prd-pic"
+                                 style="background-image: url(images/6bcbc350-db00-48b3-80ae-e806161cdee5_480_320.jpg)"></div>
+                            <div class="price">今日订</div>
+                        </div>
+                        <div class="prd-info">
+                            <p>正佳极地海洋世界</p>
+                            <div class="prd-pri">
+                                <span><i>¥</i>138<i>起</i></span>
+                            </div>
+                        </div>
+                    </a>
+                    <a class="cmAddClick" lv-on="click:cmHotProduct($event)" href="//m.lvmama.com/ticket/piao-181554"
+                       index="2" productName="广州塔">
+                        <div class="img-wrap">
+                            <div class="prd-pic" style="background-image: url(images/1499313283_54452.jpg)"></div>
+                            <div class="price">今日订</div>
+                        </div>
+                        <div class="prd-info">
+                            <p>广州塔</p>
+                            <div class="prd-pri">
+                                <span><i>¥</i>150<i>起</i></span>
+                            </div>
+                        </div>
+                    </a>
+                    <a class="cmAddClick" lv-on="click:cmHotProduct($event)" href="//m.lvmama.com/ticket/piao-242300"
+                       index="3" productName="广州长隆国际马戏大剧院">
+                        <div class="img-wrap">
+                            <div class="prd-pic"
+                                 style="background-image: url(images/91e8caaf-aca8-4839-95c1-5ab7938ee72e_480_320.jpg)"></div>
+                            <div class="price">今日订</div>
+                        </div>
+                        <div class="prd-info">
+                            <p>广州长隆国际马戏大剧院</p>
+                            <div class="prd-pri">
+                                <span><i>¥</i>340<i>起</i></span>
+                            </div>
+                        </div>
+                    </a>
+                    <a class="cmAddClick" lv-on="click:cmHotProduct($event)" href="//m.lvmama.com/ticket/piao-253986"
+                       index="4" productName="从化碧水湾温泉度假村">
+                        <div class="img-wrap">
+                            <div class="prd-pic"
+                                 style="background-image: url(images/cf2d5550-1891-4ed0-99a2-64fb3623ea3d_480_320.jpg)"></div>
+                            <div class="price">今日订</div>
+                        </div>
+                        <div class="prd-info">
+                            <p>从化碧水湾温泉度假村</p>
+                            <div class="prd-pri">
+                                <span><i>¥</i>169<i>起</i></span>
+                            </div>
+                        </div>
+                    </a>
+                    <a class="cmAddClick" lv-on="click:cmHotProduct($event)" href="//m.lvmama.com/ticket/piao-181833"
+                       index="5" productName="广州长隆野生动物世界">
+                        <div class="img-wrap">
+                            <div class="prd-pic"
+                                 style="background-image: url(images/3e4067a7-5b17-4719-9df0-f0da3c813f64_480_320.jpg)"></div>
+                            <div class="price">今日订</div>
+                        </div>
+                        <div class="prd-info">
+                            <p>广州长隆野生动物世界</p>
+                            <div class="prd-pri">
+                                <span><i>¥</i>245<i>起</i></span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="themeImg">
+        <a href="https://zt1.lvmama.com/template4/index/4407?losc&#x3D;326832&amp;ict&#x3D;1" name="双旦大促"
+           lv-on="click:cmThemeImg($event)">
+            <img src="picture/1544752777_23374.jpg"/>
+        </a>
+    </div>
+
+    <div class="iconList">
+        <div class="iconTitle">精选主题</div>
+        <div class="iconHuadong ">
+            <div class="theme-module">
+                <a lv-on="click:cmSubjects($event)"
+                   href="https://zt1.lvmama.com/template4/index/3132?losc&#x3D;315216&amp;ict&#x3D;1" ztName="首单专享"
+                   index="0"><span style="background-image: url(images/1532516711_15240.png)">首单专享</span></a>
+            </div>
+            <div class="theme-module">
+                <a lv-on="click:cmSubjects($event)"
+                   href="https://m.lvmama.com/tour/ticket?keyword&#x3D;%E5%B9%BF%E5%B7%9E%E6%B8%A9%E6%B3%89&amp;homeSearch&#x3D;1"
+                   ztName="温泉季" index="1"><span
+                        style="background-image: url(images/1514514283_32484.png)">温泉季</span></a>
+            </div>
+            <div class="theme-module">
+                <a lv-on="click:cmSubjects($event)" href="https://zt1.lvmama.com/template4/index/2135" ztName="天天特价"
+                   index="2"><span style="background-image: url(images/1498706868_37204.png)">天天特价</span></a>
+            </div>
+            <div class="theme-module">
+                <a lv-on="click:cmSubjects($event)"
+                   href="//m.lvmama.com/mainSearch/preSearch.htm?keyword&#x3D;%E5%B9%BF%E4%B8%9C%E4%B9%90%E5%9B%AD&amp;homeSearch&#x3D;12"
+                   ztName="主题乐园" index="3"><span style="background-image: url(images/1494484088_80124.png)">主题乐园</span></a>
+            </div>
+            <div class="theme-module">
+                <a lv-on="click:cmSubjects($event)"
+                   href="//m.lvmama.com/mainSearch/preSearch.htm?keyword&#x3D;182837%2C249022%2C182753%2C182740%2C183878%2C172151%2C416281%2C359860%2C181800%2C436970%2C172367%2C254008%2C254002%2C254125%2C254082%2C391783&amp;homeSearch&#x3D;12"
+                   ztName="湖光山色" index="4"><span style="background-image: url(images/1494484254_62964.png)">湖光山色</span></a>
+            </div>
+            <div class="theme-module">
+                <a lv-on="click:cmSubjects($event)"
+                   href="//m.lvmama.com/mainSearch/preSearch.htm?keyword&#x3D;248463%2C172125%2C249553%2C249096%2C256289%2C183873%2C279228%2C256170%2C423446%2C345525%2C253943%2C256548%2C256568%2C782663%2C248918%2C338792%2C251826&amp;homeSearch&#x3D;12"
+                   ztName="民俗古镇" index="5"><span style="background-image: url(images/1494484588_71785.png)">民俗古镇</span></a>
+            </div>
+            <div class="theme-module">
+                <a lv-on="click:cmSubjects($event)" href="https://zt1.lvmama.com/template4/index/4415" ztName="拼团"
+                   index="6"><span style="background-image: url(images/1533106159_74968.png)">拼团</span></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="viewspot-recommend">
+        <div class="title">
+            <p>热门景点</p>
+            <a lv-on="click:cmNearBy($event)" lv-href="stnearbyUrl"><span>附近景点</span></a>
+        </div>
+        <div id="tickets">
+            <div class="list" id="grid" render-loop="list">
+                <div class="lvAddBgcolor">
+                    <!--<a lv-on="click:cmRecommend($event)" index="0" page="1" name="正佳极地海洋世界"
+                       href="//m.lvmama.com/ticket/piao-616068">-->
+                    <div class="recommend-module">
+                        <div class="recommend-pic lazyLoad">
+                            <img class="image" render-src="list.imgUrl" alt="">
+                            <div class='todaybook-sign'></div>
+                        </div>
+                        <div class="msg">
+                            <p class="name" render-html="list.title">正佳极地海洋世界</p>
+                            <div class="mark">
+                                <span class="hui">优惠</span>
+                            </div>
+                            <div class="notes pdt3">
+                                <span>94.7%满意</span>
+                            </div>
+                            <div class="tips bt2 width39">
+                                <span render-html="list.region">广州 天河区 </span>
+                            </div>
+                            <div class="price">
+                                <span>&yen;<i render-html="list.price">138</i><i>起</i></span>
+                                <div>
+                                    <a class="btn" style="font-size: small" render-fun="getHref" render-key="list.id"
+                                       data-href="http://localhost/mine/buyTicket.html?id=">
+                                        购买
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <a href="//m.lvmama.com/mainSearch/preSearch.htm?homeSearch&#x3D;12&amp;keyword&#x3D;广东"
+           lv-on="click:cmMoreRecommend($event)">
+            <div class="moreScenic">更多广东景点</div>
+        </a>
+    </div>
+
+    <div class="aroundDest">
+        <div class="aroundTitle">周边城市</div>
+        <nav class="city-name">
+            <ul>
+                <a lv-on="click:cmNearCity($event)" href="//m.lvmama.com/ticket/near/gd?cityIndex&#x3D;0" cityName="广州"
+                   index="0">
+                    <li lv-class="{true : 'active',false : ''}['0' === aroundCityIndex]">广州</li>
+                </a>
+                <a lv-on="click:cmNearCity($event)" href="//m.lvmama.com/ticket/near/gd?cityIndex&#x3D;1" cityName="珠海"
+                   index="1">
+                    <li lv-class="{true : 'active',false : ''}['1' === aroundCityIndex]">珠海</li>
+                </a>
+                <a lv-on="click:cmNearCity($event)" href="//m.lvmama.com/ticket/near/gd?cityIndex&#x3D;2" cityName="韶关"
+                   index="2">
+                    <li lv-class="{true : 'active',false : ''}['2' === aroundCityIndex]">韶关</li>
+                </a>
+                <a lv-on="click:cmNearCity($event)" href="//m.lvmama.com/ticket/near/gd?cityIndex&#x3D;3" cityName="清远"
+                   index="3">
+                    <li lv-class="{true : 'active',false : ''}['3' === aroundCityIndex]">清远</li>
+                </a>
+                <a lv-on="click:cmNearCity($event)" href="//m.lvmama.com/ticket/near/gd?cityIndex&#x3D;4" cityName="佛山"
+                   index="4">
+                    <li lv-class="{true : 'active',false : ''}['4' === aroundCityIndex]">佛山</li>
+                </a>
+                <a lv-on="click:cmNearCity($event)" href="//m.lvmama.com/ticket/near/gd?cityIndex&#x3D;5" cityName="深圳"
+                   index="5">
+                    <li lv-class="{true : 'active',false : ''}['5' === aroundCityIndex]">深圳</li>
+                </a>
+                <a lv-on="click:cmNearCity($event)" href="//m.lvmama.com/ticket/near/gd?cityIndex&#x3D;6" cityName="桂林"
+                   index="6">
+                    <li lv-class="{true : 'active',false : ''}['6' === aroundCityIndex]">桂林</li>
+                </a>
+                <a lv-on="click:cmNearCity($event)" href="//m.lvmama.com/ticket/near/gd?cityIndex&#x3D;7" cityName="张家界"
+                   index="7">
+                    <li lv-class="{true : 'active',false : ''}['7' === aroundCityIndex]">张家界</li>
+                </a>
+                <a lv-on="click:cmNearCity($event)" href="//m.lvmama.com/ticket/near/gd?cityIndex&#x3D;8" cityName="三亚"
+                   index="8">
+                    <li lv-class="{true : 'active',false : ''}['8' === aroundCityIndex]">三亚</li>
+                </a>
+            </ul>
+        </nav>
+    </div>
+
+
+    <a class="JWhref" href="https://m.lvmama.com/localfun/mp" lv-on="click:cmOversea($event)">
+        <div class="youjirukou">
+            <i class="youji-icon"></i>
+            <span class="youji-text">境外门票</span>
+            <span class="youji-more-text">查看更多境外门票</span>
+            <i class="youji-more"></i>
+        </div>
+    </a>
+</div>
+
+<script>
+    /**
+     * 页面需要用的变量
+     */
+    var currentPage = '',
+        isLastPage = 'false',
+        stationCode = 'GD',
+        stationId = '22',
+        stationName = '广东',
+        stationPinyin = 'guangdong',
+        fromDestId = '322';
+</script>
+<script>
+    //在华为生活app中 隐藏下载banner
+    if (window.lives != null && window.lives.getAccessToken != null) {
+        sessionStorage.setItem('dClose', true);
+    }
+</script>
+<script type="text/javascript" src="js/jspring-1.0.3.min.js"></script>
+<script src="js/build.min.js"></script>
+<script src="js/build.min_1.js"></script>
+<script src="js/build.min_2.js"></script>
+<script src="js/code.min.js"></script>
+<script src="js/build.min_3.js"></script>
+<script src="js/build.min_4.js"></script>
+<script type="text/javascript" src="js/build.min_5.js"></script>
+<script>
+    if (window.lives != null && window.lives.getAccessToken != null) {
+        lvHeader.hide();//华为生活app 设置公共头部插件
+        document.getElementById('tpl').style.paddingTop = '.9rem';
+        document.getElementsByClassName('search-header')[0].style.top = 0;
+        document.title = '景点门票';
+    } else {
+        lvHeader.setTitle("景点门票").setRight(["category", "home"]);//设置公共头部插件
+    }
+</script>
+
+<script type="text/javascript" src="js/tickethome.js"></script>
+</body>
+</html>

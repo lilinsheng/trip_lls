@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.trip.base.mapper.CommentMapper">
+
+    <!-- 把未查看状态改为已查看  游记的 -->
+    <update id="updateTravelState">
+        UPDATE travelcomment
+        SET state = 0
+        WHERE id = #{id}
+    </update>
+
+    <!-- 把未查看状态改为已查看  朋友圈的 -->
+    <update id="updateFriendState">
+        UPDATE friendcomment
+        SET state = 0
+        WHERE id = #{id}
+    </update>
+
+    <!-- 查看当前用户未被查看的游记评论数 -->
+    <select id="selectUnreadTravelCount" resultType="int">
+        SELECT  count(0) FROM travelcomment comment
+        JOIN travel ON comment.travel_id = travel.id
+        WHERE comment.state = 1
+        AND travel.author_id = #{userId}
+    </select>
+
+    <!-- 查看当前用户未被查看的朋友圈动态评论数 -->
+    <select id="selectUnreadFriendCount" resultType="int">
+        SELECT count(0) FROM friendcomment comment
+        JOIN friend ON comment.friend_id = friend.id
+        WHERE comment.state = 1
+        AND friend.user_id = #{userId}
+    </select>
+
+    <!-- 查询被评论的游记 -->
+    <select id="selectTravelHistory" resultType="map">
+        SELECT comment.id,DATE_FORMAT(comment.createTime,'%Y-%m-%d %T') createTime,comment.content,comment.state,
+        user.id user_id,user.nickName user_nickName,user.headImgUrl user_headImgUrl,
+        travel.id travel_id,travel.title travel_title
+        FROM travelcomment comment
+        JOIN user ON comment.user_id = user.id
+        JOIN travel ON comment.travel_id = travel.id
+        WHERE travel.author_id = #{userId}
+        ORDER BY comment.state DESC,createTime DESC
+    </select>
+    <!-- 查询被评论的朋友圈 -->
+    <select id="selectFriendHistory" resultType="map">
+        SELECT comment.id,DATE_FORMAT(comment.createTime,'%Y-%m-%d %T') createTime,comment.content,comment.state,
+        user.id user_id,user.nickName user_nickName,user.headImgUrl user_headImgUrl,
+        friend.id friend_id,friend.content friend_content
+        FROM friendcomment comment
+        JOIN user ON comment.user_id = user.id
+        JOIN friend ON comment.friend_id = friend.id
+        WHERE friend.user_id = 1
+         ORDER BY comment.state DESC,createTime DESC
+    </select>
+</mapper>

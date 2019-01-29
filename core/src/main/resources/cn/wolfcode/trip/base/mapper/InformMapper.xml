@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.trip.base.mapper.InformMapper">
+    <!-- 查询所有通知 -->
+    <select id="selectAll" resultType="map">
+        (SELECT id,title,coverUrl,inform,DATE_FORMAT(lastUpdateTime,'%y-%m-%d %T') lastUpdateTime
+        FROM travel
+        WHERE author_id = #{userId} AND NOT inform IS NULL AND inform != -3)
+        UNION ALL
+        (SELECT commend.id,commend.title,commend.coverUrl,commend.inform, DATE_FORMAT(commend.lastUpdateTime,'%y-%m-%d %T') lastUpdateTime
+        FROM travelcommend commend
+        JOIN travel ON commend.travel_id = travel.id
+        WHERE travel.author_id = #{userId} AND NOT commend.inform IS NULL AND commend.inform != -3)
+        ORDER BY lastUpdateTime DESC
+    </select>
+    <!-- 查询未被查看过的通知数  游记的 -->
+    <select id="selectCountTravelNum" resultType="int">
+        SELECT count(0)
+        FROM travel
+        WHERE author_id = #{userId} AND NOT inform  IS NULL AND inform != -3
+    </select>
+    <!-- 查询未被查看过的通知数  攻略的 -->
+    <select id="selectCountTravelCommendNum" resultType="int">
+        SELECT count(0)
+        FROM travelcommend commend
+        JOIN travel ON commend.travel_id = travel.id
+        WHERE travel.author_id = #{userId} AND NOT commend.inform  IS NULL AND commend.inform != -3
+    </select>
+</mapper>

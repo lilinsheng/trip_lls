@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.trip.base.mapper.MySessionMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.trip.base.domain.MySession">
+        <result column="speaker_id" property="speaker.id" />
+        <result column="responder_id" property="responder.id" />
+        <result column="content" property="content" />
+        <result column="createTime" property="createTime" />
+        <result column="type" property="type" />
+    </resultMap>
+
+    <insert id="insert">
+        INSERT INTO mysession (speaker_id, responder_id, content, createTime, type,state)
+        VALUES (#{speaker.id}, #{responder.id}, #{content}, #{createTime}, #{type},#{state})
+    </insert>
+
+    <!-- 添加好友 -->
+    <insert id="insertMyFriend">
+        INSERT myfriend (my_id, friend_id) VALUES (#{userId},#{friendId})
+    </insert>
+
+
+    <!-- 把看过的信息状态设置为0 -->
+    <update id="updateState" >
+        UPDATE mysession
+        SET state = 0
+        WHERE speaker_id = #{responder.id} AND responder_id = #{speaker.id} AND state = 1
+    </update>
+    <!-- 把看过的信息状态设置为0 一开始的查看-->
+    <update id="updateStateOnFirst">
+        UPDATE mysession
+        SET state = 0
+        WHERE speaker_id IN (#{userId},#{interlocutorId}) AND responder_id IN (#{userId},#{interlocutorId})
+    </update>
+    <!-- 删除好友 -->
+    <delete id="deleteFriend">
+        DELETE FROM myfriend
+        WHERE my_id = #{userId} AND friend_id = #{friendId}
+        OR  my_id = #{friendId} AND friend_id = #{userId}
+    </delete>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT speaker_id, responder_id, content, createTime, type
+        FROM mysession
+    </select>
+
+    <!-- 查询所有好友 -->
+    <select id="selectMyFriend" resultType="map">
+      	SELECT temp.createTime,user.id user_id,user.nickName user_nickName,user.headImgUrl user_headImgUrl,IFNULL(max(temp.state),0) state
+		FROM(
+            (SELECT responder_id interlocutor_id,createTime,state
+            FROM mysession
+            WHERE speaker_id =  #{userId})
+            UNION ALL
+            (SELECT speaker_id interlocutor_id,createTime,state
+            FROM mysession
+            WHERE responder_id =  #{userId})
+            ORDER BY createTime DESC
+		) temp
+		RIGHT JOIN user ON temp.interlocutor_id = user.id
+		JOIN myfriend ON myfriend.friend_id = user.id AND myfriend.my_id = #{userId}
+		GROUP BY temp.interlocutor_id
+        ORDER BY temp.createTime DESC
+    </select>
+
+    <!-- 查询对话 -->
+    <select id="selectMyChats" resultType="map">
+        SELECT speaker_id,responder_id,DATE_FORMAT(createTime,'%Y-%m-%d %T') createTime,content
+        FROM mysession
+        WHERE speaker_id IN (#{userId},#{interlocutorId}) AND responder_id IN (#{userId},#{interlocutorId})
+        ORDER BY createTime DESC
+    </select>
+    <!-- 查询别人发送的数据 -->
+    <select id="selectInterlocutorMsg" resultType="map" parameterType="mySession">
+        SELECT speaker_id,responder_id,DATE_FORMAT(createTime,'%Y-%m-%d %T') createTime,content
+        FROM mysession
+        WHERE speaker_id = #{responder.id} AND responder_id = #{speaker.id} AND state = 1
+    </select>
+    <!--获取未被查看的私信数-->
+    <select id="selectCountUnreadMsg" resultType="int">
+        SELECT count(0)
+        FROM mysession
+        WHERE responder_id = #{userId} AND state = 1
+    </select>
+
+    <!-- 查询申请添加你的好友 -->
+    <select id="selectFriendsForAdd" resultType="user">
+        SELECT user.id,user.nickName,user.headImgUrl
+        FROM myfriend
+        JOIN user ON myfriend.my_id = user.id
+        WHERE myfriend.friend_id = #{userId} AND NOT myfriend.my_id IN (
+        SELECT friend_id
+        FROM myfriend
+        WHERE my_id = #{userId})
+    </select>
+</mapper>

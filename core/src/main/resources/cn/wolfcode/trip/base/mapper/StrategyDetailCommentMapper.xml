@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.trip.base.mapper.StrategyDetailCommentMapper">
+  <resultMap id="BaseResultMap" type="cn.wolfcode.trip.base.domain.StrategyDetailComment">
+    <id column="id" property="id" />
+    <result column="commentdate" property="commentdate" />
+    <result column="content" property="content" />
+    <association property="user" javaType="user" columnPrefix="u_">
+      <id column="id" property="id"/>
+      <result column="nickName" property="nickName"/>
+      <result column="headImgUrl" property="headImgUrl"/>
+    </association>
+    <association property="strategycomment" javaType="strategyComment">
+      <id column="strategycomment_id" property="id"/>
+    </association>
+    <collection property="comments" select="cn.wolfcode.trip.base.mapper.StrategyDetailCommentMapper.selectForListSon" column="{parentId=id,strategycommentId=strategycomment_id}"></collection>
+  </resultMap>
+  <delete id="deleteByPrimaryKey">
+    delete from strategydetailcomment
+    where id = #{id}
+  </delete>
+  <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+    insert into strategydetailcomment (user_id, commentdate, content, parent_id, strategycomment_id
+      )
+    values (#{user.id}, now(), #{content}, #{parentId}, #{strategycomment.id}
+      )
+  </insert>
+  <update id="updateByPrimaryKey">
+    update strategydetailcomment
+    set user_id = #{user.id},
+      commentdate = #{commentdate},
+      content = #{content},
+      parent_id = #{parentId},
+      strategycomment_id = #{strategycomment.id}
+    where id = #{id}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+    select id, user_id, commentdate, content, parent_id, strategycomment_id
+    from strategydetailcomment
+    where id = #{id}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, user_id, commentdate, content, parent_id, strategycomment_id
+    from strategydetailcomment
+  </select>
+
+
+  <select id="selectForList" resultMap="BaseResultMap">
+    select sdc.id, sdc.user_id, sdc.commentdate, sdc.content, sdc.parent_id, sdc.strategycomment_id,
+    u.id u_id,u.nickName u_nickName,u.headImgUrl u_headImgUrl
+    from strategydetailcomment sdc JOIN user u ON sdc.user_id=u.id
+    <where>
+      <if test="strategyCommentId!=null">
+        AND strategycomment_id = #{strategyCommentId}
+      </if>
+      AND parent_id is null
+    </where>
+  </select>
+
+  <select id="selectCountById" resultType="long">
+    SELECT count(id) FROM strategydetailcomment
+    WHERE strategycomment_id = #{id}
+  </select>
+
+  <select id="selectForListSon" resultMap="BaseResultMap">
+    select sdc.id, sdc.user_id, sdc.commentdate, sdc.content, sdc.parent_id, sdc.strategycomment_id,
+    u.id u_id,u.nickName u_nickName,u.headImgUrl u_headImgUrl
+    from strategydetailcomment sdc JOIN user u ON sdc.user_id=u.id
+    WHERE strategycomment_id = #{strategycommentId}
+    AND parent_id = #{parentId}
+  </select>
+</mapper>

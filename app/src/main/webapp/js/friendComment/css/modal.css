@@ -1,0 +1,76 @@
+#box{
+    width: 100%;
+    margin-top: 20px;
+}
+#box{
+    border-radius: 0px;
+}
+.takeComment{
+    padding:10px 20px;
+    border:1px solid #ccc;
+    background-color: #eef3fa;
+}
+.takeComment .takeSbmComment{
+    margin-top: 15px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+}
+.takeComment .takeSbmComment button,.takeComment .takeSbmComment span{
+
+    vertical-align: middle;
+}
+.takeComment .takeSbmComment span{
+    color: #aaa;
+    font-size: 12px;
+    margin:0 10px;
+}
+.commentOn{
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    background-color: #eef3fa;
+}
+.commentOn .messList,.commentOn .noContent{
+    background-color: #fff;
+}
+.commentOn .messList .reply{
+    border-bottom: 1px solid #ccc;
+    padding:10px;
+}
+.commentOn .noContent,.commentOn .messList .operation{
+    color: #aaa;
+}
+.commentOn .noContent{
+    text-align: center;
+    padding:10px;
+}
+.commentOn .messList .operation .replyTime{
+    float: left;
+}
+.commentOn .messList .operation .handle{
+    float: right;
+}
+.commentOn .messList .operation .handle a{
+    display: inline-block;
+    color: #666;
+    text-decoration: none;
+
+}
+.commentOn .messList .operation .handle a span.fa{
+    margin-left: 5px;
+    color: #aaa;
+}
+.commentOn .messList .operation .handle a span{
+    vertical-align: middle;
+}
+.commentOn .page{
+    text-align: center;
+}
+.commentOn .page ul{
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+.myModal{
+    top: 60%;
+}

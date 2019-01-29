@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.trip.base.mapper.FriendCommentMapper">
+  <resultMap id="BaseResultMap" type="cn.wolfcode.trip.base.domain.FriendComment">
+    <id column="id" property="id" />
+    <result column="createTime" property="createTime" />
+    <result column="content" property="content" />
+    <result column="state" property="state" />
+    <association property="user" javaType="user" columnPrefix="u_">
+      <id column="id" property="id"/>
+      <result column="nickName" property="nickName"/>
+    </association>
+    <association property="parent" javaType="user" columnPrefix="father_">
+      <id column="id" property="id"/>
+      <result column="nickName" property="nickName"/>
+    </association>
+    <association property="friend" javaType="friend">
+      <id column="friend_id" property="id"/>
+    </association>
+    <collection property="sonFriendComments" ofType="friendComment" select="cn.wolfcode.trip.base.mapper.FriendCommentMapper.selectByParentId" column="{friendId=friend_id,commentId=id}"></collection>
+  </resultMap>
+
+  <delete id="deleteByPrimaryKey">
+    delete from friendcomment
+    where id = #{id}
+  </delete>
+  <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+    insert into friendcomment (user_id, parent_id, createTime, content, friend_id, state
+      )
+    values (#{user.id}, #{parent.id}, #{createTime}, #{content}, #{friend.id}, #{state}
+      )
+  </insert>
+  <update id="updateByPrimaryKey">
+    update friendcomment
+    set user_id = #{user.id},
+      parent_id = #{parent.id},
+      createTime = #{createTime},
+      content = #{content},
+      friend_id = #{friend.id},
+      state = #{state}
+    where id = #{id}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+    select id, user_id, parent_id, createTime, content, friend_id, state
+    from friendcomment
+    where id = #{id}
+  </select>
+
+  <!-- 查询当前评论的子级评论 -->
+  <select id="selectByParentId" resultMap="BaseResultMap">
+    select fc.id, fc.user_id, fc.parent_id, fc.createTime, fc.content, fc.friend_id, fc.state,
+    u.id u_id,u.nickName u_nickName,
+    father.id father_id,father.nickName father_nickName
+    from friendcomment fc
+    LEFT JOIN user u ON fc.user_id = u.id
+    LEFT JOIN friendcomment fc1 ON fc.parent_id=fc1.id
+    LEFT JOIN user father ON fc1.user_id= father.id
+    where fc.parent_id = #{commentId} AND fc.friend_id = #{friendId}
+  </select>
+
+  <!-- 查询当前评论的一级评论 -->
+  <select id="selectByOneParentId" resultMap="BaseResultMap">
+    select fc.id, fc.user_id, fc.parent_id, fc.createTime, fc.content, fc.friend_id, fc.state,
+    u.id u_id,u.nickName u_nickName
+    from friendcomment fc
+    LEFT JOIN user u ON fc.user_id = u.id
+    where fc.friend_id = #{parentId} AND fc.parent_id IS NULL
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, user_id, parent_id, createTime, content, friend_id, state
+    from friendcomment
+  </select>
+
+  <!-- 查询我评论过的朋友圈 -->
+    <select id="selectFriendDiscuss" resultType="map">
+      SELECT fm.id fm_id,fm.content fm_content,fm.createTime fm_createTime,
+        f.id f_id,f.content f_content,
+        u.id u_id,u.nickName u_nickName,u.headImgUrl u_headImgUrl
+        FROM friendcomment fm JOIN friend f ON fm.friend_id=f.id
+          JOIN user u ON f.user_id=u.id
+      WHERE fm.user_id=#{userId}
+    </select>
+</mapper>

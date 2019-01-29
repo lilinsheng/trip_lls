@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<title>微博评论留言</title>
+	<script type="text/javascript" src="/js/jquery/jquery.min.js"></script>
+	<link rel="stylesheet" href="/js/friendComment/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/js/friendComment/css/font-awesome.min.css">
+	<link rel="stylesheet" href="/js/friendComment/css/modal.css">
+	<script type="text/javascript" src="/js/friendComment/js/jquery-1.11.3.js"></script>
+	<script type="text/javascript" src="/js/friendComment/js/vue.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+	<script type="text/javascript" src="/js/friendComment/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/js/friendComment/js/bootstrap-paginator.min.js"></script>
+
+	<style>
+
+	</style>
+
+	<script>
+		$(function () {
+			$('#btn').click(function () {
+				$('#myModal').modal("show");
+            });
+        })
+	</script>
+</head>
+<body>
+<button id="btn">11</button>
+	<div id="myModal" class="modal fade myModal">
+		<div class="modal-dialog">
+			<div id="box" class="container">
+				<!--留言-->
+				<div class="takeComment">
+					<textarea name="textarea" rows="6" class="takeTextField form-control" placeholder="在这里输入你想说的话吧" id="tijiaoText" v-model="txtval"></textarea>
+					<div class="takeSbmComment clearfix">
+						<button type="button" class="inputs btn btn-success btn-sm" value="" @click="addfun()" data-dismiss="modal">关闭</button>
+						&nbsp;&nbsp;
+						<button type="button" class="inputs btn btn-success btn-sm" value="" @click="addfun()">提交评论</button>
+					</div>
+				</div>
+			</div>
+		</div><!-- /.modal-dialog -->
+	</div>
+</body>
+
+</html>
+
+

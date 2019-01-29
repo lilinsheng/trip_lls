@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>结伴报名 - 马蜂窝</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no,minimal-ui,viewport-fit=cover">
+    <meta name="copyright" content="Copyright (c) 2006-2018 Mafengwo.">
+    <meta name="format-detection" content="telephone=no,address=no">
+    <meta name="referrer" content="always">
+    <meta name="apple-mobile-web-app-capable" content="no">
+    <meta name="apple-mobile-web-app-status-bar-style" content="no">
+    <meta property="og:title" content="结伴报名 - 马蜂窝">
+    <meta property="og:url" content="https://m.mafengwo.cn/together/apply/2194171.html">
+    <meta property="og:image" content="https://images.mafengwo.net/mobile/images/logo_2015.png">
+    <meta property="og:description" content="">
+    <script type="text/javascript">
+        window.Env = {
+            "CNZZID": 30081550,
+            "IS_MOBILE": true,
+            "WWW_HOST": "www.mafengwo.cn",
+            "IMG_HOST": "images.mafengwo.net",
+            "P_HOST": "passport.mafengwo.cn",
+            "P_HTTP": "https:\/\/passport.mafengwo.cn",
+            "PAGELET_HTTP": "https:\/\/pagelet.mafengwo.cn",
+            "JS_HOST": "js.mafengwo.net",
+            "UID": 53829111,
+            "CSTK": "d6f6a118e06cdb294678eb6bfbb51c64_9f24d8af60744fc177429b15803fe1f4",
+            "GOOGLE_MAP_KEY": "AIzaSyD-Su0x_rPy1xehlMBcMyTqWkU49Bk53nQ",
+            "TONGJI_HOST": "tongji.mafengwo.cn"
+        };
+    </script>
+    <link rel="stylesheet" href="/js/bootstrap-4.1.1-dist/css/bootstrap.min.css">
+    <script src="/js/jquery/jquery.min.js"></script>
+    <script src="/js/bootstrap-4.1.1-dist/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/css/font/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/css/reset.css"/>
+    <link rel="stylesheet" href="/css/myInfo.css"/>
+    <script src="/js/plugins/form/jquery.form.js"></script>
+    <script src="/js/plugins/jrender/jrender.min.js"></script>
+    <link href="../applyfiles/mobile+css+head_mobile+css+ui^YVw^1526627473.css" rel="stylesheet" type="text/css">
+    <script src="/js/common.js"></script>
+    <link rel="stylesheet" href="/js/plugins/dialog2/dialog.css"/>
+    <script src="/js/plugins/dialog2/dialog.min.js"></script>
+    <!--<style>
+        body {
+            background: url("../img/1.jpg");
+            width: 100%;
+        }
+    </style>-->
+    <script>
+        $(function () {
+            //获取结伴的id
+            var id = getParams().id;
+            console.log(id);
+            $("#fereId").val(id);
+            //选中性别的点击事件
+            $(".gBtn").click(function () {
+                var gender = $(this).data("gid");
+                if (gender) {
+                    $("#female").addClass("on");
+                    $("#male").removeClass("on");
+                    $("#gender").val(0);
+                }else{
+                    $("#male").addClass("on");
+                    $("#female").removeClass("on");
+                    $("#gender").val(1);
+                }
+            });
+            $("#submit").click(function () {
+                $("#applyForm").ajaxSubmit(function (data) {
+                    if (data.success) {
+                        $(document).dialog({
+                            type: 'notice',
+                            infoText: '报名成功!',
+                            autoClose: 1000,
+                            position: 'center'  // center: 居中; bottom: 底部
+                        });
+                        setTimeout(function () {
+                            window.location.href = "/fere.html";
+                        }, 1000)
+                    }
+                })
+            });
+        })
+    </script>
+</head>
+<body>
+<div id="pos38"></div>
+<header class="head2home">
+    <a href="/"><img src="/img/logo.png"></a>
+    <div class="rBtn">
+        <a href="/" class="home">首页</a>
+    </div>
+</header>
+<link href="../applyfiles/together.css" rel="stylesheet" type="text/css">
+<section class="container">
+    <form id="applyForm" action="/applies" method="post">
+        <input type="hidden" name="fere.id" id="fereId">
+        <input type="hidden" name="gender" id="gender" value="-1">
+        <div class="publish">
+            <div class="mod-gender">
+                <span class="label">性别</span>
+                <span class="item _j_gender  gBtn" data-gid="0" id="male">
+                     <img src="/img/male.png" width="20px"/>
+                    Mr
+                 </span>
+                <span class="item _j_gender  gBtn" data-gid="1" id="female">
+                     <img src="/img/female.png" width="20px"/>
+                     Mrs
+                 </span>
+            </div>
+            <div class="streak"></div>
+            <div class="mod-contact">
+                <h2>报名信息<span>（仅对报名的人可见）</span></h2>
+                <ul class="bd">
+                    <li><input class="_j_phone" placeholder="姓名" name="name"></li>
+                    <li><input type="number" class="_j_phone" placeholder="人数" name="peoples"></li>
+                    <li><input type="tel" class="_j_phone" placeholder="手机号" name="tel"></li>
+                </ul>
+            </div>
+            <div class="streak"></div>
+            <div class="mod-body">
+                <h2>备注</h2>
+                <div class="bd">
+                    <textarea class="_j_note" rows="5" name="text"></textarea>
+                </div>
+            </div>
+            <div style="height: 200px;">
+            </div>
+        </div>
+    </form>
+</section>
+<div class="fixed-btm _j_sort_html">
+    <div class="btn-group">
+        <a class="btn-add _j_submit" id="submit">确定</a>
+    </div>
+</div>
+</body>
+</html>

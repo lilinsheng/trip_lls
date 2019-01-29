@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>识别二维码</title>
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>
+    <!-- <link rel="stylesheet" href="/js/bootstrap-4.1.1-dist/css/bootstrap.min.css">-->
+    <script src="/js/jquery/jquery.min.js"></script>
+    <!--    <script src="/js/bootstrap-4.1.1-dist/js/bootstrap.min.js"></script>-->
+    <!--   <link rel="stylesheet" href="/css/font/css/font-awesome.min.css">-->
+    <!--    <link rel="stylesheet" href="/css/reset.css" rel="stylesheet" >
+        <link rel="stylesheet" href="/css/index.css" rel="stylesheet">-->
+    <script src="/js/plugins/jrender/jrender.min.js"></script>
+    <!--    <link rel="stylesheet" href="/css/myProfiles.css"/>
+        <link rel="stylesheet" href="/css/strategy.css"/>-->
+    <link rel="stylesheet" href="/js/plugins/dialog2/dialog.css">
+    <script src="/js/plugins/dialog2/dialog.min.js"></script>
+    <link href="/mine/addfriend/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="/css/font/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <!--    <script src="/js/common.js"></script>-->
+
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+
+        .module-content {
+            min-width: 320px;
+            max-width: 1000px;
+            width: 100%;
+            color: #000;
+            margin: 0 auto;
+            padding-left: 10px;
+            box-sizing: border-box;
+        }
+
+        .module-head {
+            text-align: center;
+            font-weight: 500;
+            margin: 0;
+            font-size: 30px;
+            height: 100px;
+            line-height: 100px;
+            color: #000;
+        }
+
+        .box h3 {
+            font-weight: 300;
+            margin: 0;
+            font-size: 20px;
+            height: 60px;
+            line-height: 60px;
+            color: #000;
+        }
+
+        .url-box {
+            height: 30px;
+            line-height: 30px;
+            font-size: 14px;
+        }
+
+        #file {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            opacity: 0;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            z-index: 10;
+        }
+    </style>
+    <script>
+        // 我的方法
+        function add(email) {
+            $.get("/users/" + email + "/ByEmail", function (data) {
+                console.log(data);
+                $(document).dialog({
+                    titleText: '是否添加好友',
+                    type: 'confirm',
+                    content: '<span class="info-text">' + data.email + '</span><br/><img class="info-icon" src="' + data.coverImgUrl + '" style="width: 50px;height: 50px"/>',
+                    onClickConfirmBtn: function () {
+                        $.post("/mySession/myFriend", {friendId: data.id}, function (data) {
+                            if (data.success) {
+                                var notice5 = $(document).dialog({
+                                    type: 'notice',
+                                    infoText: '服务器处理中'
+                                });
+                                setTimeout(function () {
+                                    notice5.update({
+                                        infoText: '添加成功！！',
+                                        autoClose: 500
+                                    });
+                                }, 3000);
+                            }
+                            ;
+                        });
+                    },
+                    onClickCancelBtn: function () {
+                    }
+                });
+            });
+        };
+        $(function () {
+            // 查询好友申请
+            $.get("/mySession/myFriendsForAdd", function (data) {
+                console.log({list: data});
+                $('#friend').renderValues({list: data}, {
+                    getHref: function (item, value) {
+                        var url = $(item).data("href");
+                        $(item).attr("href", url + value);
+                    }
+                });
+
+                // 接受好友申请
+                $('.add').click(function () {
+                    var id = $(this).data("id");
+                    $.post("/mySession/myFriend",{friendId:id});
+                    location.reload();
+                });
+
+                // 拒绝好友申请
+                $('.delete').click(function () {
+                    var id = $(this).data("id");
+                    $.ajax({
+                        type:'delete',
+                        url:'/mySession/' + id,
+                        success:function () {
+                            location.reload();
+                        }
+                    });
+                });
+            });
+
+
+        });
+    </script>
+</head>
+<body>
+<section class="aui-flexView">
+    <header class="aui-navBar aui-navBar-fixed b-line">
+        <a href="/mine/chatHistory.html" class="aui-navBar-item">
+            <i class="icon icon-return"></i>
+        </a>
+        <div class="aui-center">
+            <span class="aui-center-title">二维码添加好友</span>
+        </div>
+        <a href="javascript:;" class="aui-navBar-item">
+            <i class="icon icon-sys"></i>
+        </a>
+    </header>
+
+    <section class="aui-scrollView" id="friend">
+        <div class="box" >
+            <div style="position: relative;">
+                <img style="width: 120px;height: 120px;" src=""/>
+                <input type="file" onchange="getUrl(this,'file-url')" name="" id="file" value=""/>
+                <p class="url-box" id="urlBox"></p>
+            </div>
+        </div>
+        <div class="aui-friends-head">
+            <h2>好友申请</h2>
+        </div>
+        <div class="aui-friends-list" render-loop="list">
+            <a href="javascript:;" class="aui-flex">
+                <div class="aui-flex-img">
+                    <img render-src="list.headImgUrl" alt="">
+                </div>
+                <div class="aui-flex-box">
+                    <h2 render-html="list.nickName"></h2>
+                </div>
+                <div class="aui-flex-button">
+                    <button class="delete" render-attr="data-id=list.id"><i class="fa fa-minus"  ></i> 拒绝</button>
+                    <button class="add" render-attr="data-id=list.id"><i class="icon icon-add"></i>添加</button>
+                </div>
+            </a>
+        </div>
+    </section>
+</section>
+</div>
+<script src="/qrcode/llqrcode.js" type="text/javascript" charset="utf-8"></script>
+<script src="/qrcode/analyticCode.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+    function getUrl(e, param) {
+        analyticCode.getUrl(param, e, function (url1, url2) {
+            e.nextElementSibling.innerHTML = url1;
+            e.previousElementSibling.src = url2;
+            var data = $('#urlBox').html();
+            add(data);
+        });
+    }
+</script>
+</body>
+</html>

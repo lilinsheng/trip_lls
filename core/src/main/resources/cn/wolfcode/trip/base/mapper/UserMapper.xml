@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.trip.base.mapper.UserMapper">
+  <resultMap id="BaseResultMap" type="cn.wolfcode.trip.base.domain.User">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="nickName" jdbcType="VARCHAR" property="nickName" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="place" jdbcType="VARCHAR" property="place" />
+    <result column="headImgUrl" jdbcType="VARCHAR" property="headImgUrl" />
+    <result column="gender" jdbcType="INTEGER" property="gender" />
+    <result column="coverImgUrl" jdbcType="VARCHAR" property="coverImgUrl" />
+    <result column="sign" jdbcType="VARCHAR" property="sign" />
+    <result column="fans" property="fans"/>
+    <result column="score" property="score"/>
+  </resultMap>
+
+  <resultMap id="BaseResultMap1" type="cn.wolfcode.trip.base.domain.User">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="nickName" jdbcType="VARCHAR" property="nickName" />
+    <result column="headImgUrl" jdbcType="VARCHAR" property="headImgUrl" />
+    <result column="coverImgUrl" jdbcType="VARCHAR" property="coverImgUrl" />
+    <result column="fans" property="fans"/>
+    <association property="travelNums" select="cn.wolfcode.trip.base.mapper.UserMapper.selectCount" column="id"/>
+    <collection property="travels" select="cn.wolfcode.trip.base.mapper.TravelMapper.selectTravelByAuthorId" column="id"/>
+  </resultMap>
+
+    <resultMap id="BaseResultMap2" type="cn.wolfcode.trip.base.domain.User">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="nickName" jdbcType="VARCHAR" property="nickName" />
+        <result column="headImgUrl" jdbcType="VARCHAR" property="headImgUrl" />
+        <result column="coverImgUrl" jdbcType="VARCHAR" property="coverImgUrl" />
+        <result column="fans" property="fans"/>
+        <result property="travelNums"  column="nums"/>
+        <collection property="travels"  ofType="travel">
+            <id column="t_id" property="id"/>
+            <result column="t_coverUrl" property="coverUrl"/>
+        </collection>
+    </resultMap>
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from user
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+
+  <!-- 移除用户关注的关系 -->
+  <delete id="deleteUserAttentionRelation">
+      DELETE FROM friend_relation
+      WHERE attention_id =#{userId} AND focus_id=#{focusId}
+  </delete>
+
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.wolfcode.trip.base.domain.User" useGeneratedKeys="true">
+    insert into user (email, nickName, password, 
+      place, headImgUrl, gender, 
+      coverImgUrl, sign)
+    values (#{email,jdbcType=VARCHAR}, #{nickName,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
+      #{place,jdbcType=VARCHAR}, #{headImgUrl,jdbcType=VARCHAR}, #{gender,jdbcType=INTEGER}, 
+      #{coverImgUrl,jdbcType=VARCHAR}, #{sign,jdbcType=VARCHAR})
+  </insert>
+
+  <!-- 保存用户关注的关系 -->
+  <insert id="insertUserAttentionRelation">
+    INSERT INTO friend_relation(focus_id, attention_id)
+    VALUES (#{focusId},#{userId})
+  </insert>
+
+
+  <update id="updateByPrimaryKey" parameterType="cn.wolfcode.trip.base.domain.User">
+    update user
+    set nickName = #{nickName,jdbcType=VARCHAR},
+      place = #{place,jdbcType=VARCHAR},
+      headImgUrl = #{headImgUrl,jdbcType=VARCHAR},
+      gender = #{gender,jdbcType=INTEGER},
+      coverImgUrl = #{coverImgUrl,jdbcType=VARCHAR},
+      sign = #{sign,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+
+  <!-- 添加粉丝 -->
+    <update id="updateAddUserAttention">
+      UPDATE user SET fans = fans+1
+      WHERE id=#{focusId}
+    </update>
+    <!-- 减少粉丝 -->
+    <update id="updateReductUserAttention">
+      UPDATE user SET fans = fans-1
+      WHERE id=#{focusId}
+    </update>
+
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select id, email, nickName,  place, headImgUrl, gender, coverImgUrl, sign,fans,score
+    from user
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, email, nickName, place, headImgUrl, gender, coverImgUrl, sign
+    from user
+  </select>
+
+  <select id="selectByEmailAndPassword" resultType="cn.wolfcode.trip.base.domain.User">
+    select id, email, nickName, place, headImgUrl, gender, coverImgUrl, sign,score
+    from user
+    <where>
+      <if test="email!=null">
+        AND email = #{email}
+      </if>
+      <if test="password!=null">
+        AND password = #{password}
+      </if>
+    </where>
+  </select>
+
+  <select id="selectForList" resultType="user" parameterType="cn.wolfcode.trip.base.query.QueryObject">
+    select id, email, nickName,place, headImgUrl, gender, coverImgUrl, sign,score
+    from user
+    <where>
+      <if test="keyword!=null">
+        AND (email LIKE CONCAT('%',#{keyword},'%') OR nickName LIKE CONCAT('%',#{keyword},'%'))
+      </if>
+    </where>
+  </select>
+
+  <!-- 根据点赞人id和游记id查询游记 -->
+    <select id="selectFabulous" resultType="object">
+      SELECT user_id,travel_id,state,createTime FROM travel_fabulous
+      WHERE travel_id=#{travelId} AND user_id = #{id}
+    </select>
+
+  <!-- 根据点赞人id和攻略id查询攻略 -->
+    <select id="selectStrategyFabulous" resultType="object">
+      SELECT user_id,strategy_id,state,createTime FROM strategy_fabulous
+      WHERE user_id =#{userId} AND strategy_id =#{strategyId}
+    </select>
+
+    <!-- 获取粉丝数 -->
+  <select id="selectFansByUserId" resultType="int">
+    SELECT fans FROM user
+    WHERE id = #{focusId}
+  </select>
+
+  <!-- 查看当前用户是否关注 -->
+  <select id="selectIsAttentionUser" resultType="object">
+    SELECT focus_id,attention_id FROM friend_relation
+    WHERE focus_id=#{focusId} AND attention_id =#{userId}
+  </select>
+
+  <!-- 查看当前用户是否收藏该游记 -->
+  <select id="selectIsCollectTravel" resultType="object">
+    SELECT user_id,travel_id FROM travel_collect
+    WHERE user_id=#{userId} AND travel_id=#{travelId}
+  </select>
+
+  <!-- 查询当前用户是否收藏了该攻略 -->
+    <select id="selectIsCollectStrategy" resultType="object">
+      SELECT user_id,strategy_id FROM strategy_collect
+      WHERE user_id=#{userId} AND strategy_id=#{strategyId}
+    </select>
+
+  <!--查所有收藏攻略-->
+  <select id="getAllStravel" resultType="Strategy">
+    SELECT s.*
+    FROM
+      user u
+      JOIN strategy_collect sc ON u.id = sc.user_id
+      JOIN strategy s ON sc.strategy_id=s.id
+    WHERE u.id=#{id}
+  </select>
+
+  <!--查所有收藏游记-->
+  <select id="getAllTravel" resultType="travel">
+    SELECT t.*
+    FROM
+      user u
+      JOIN travel_collect tc ON u.id = tc.user_id
+      JOIN travel t ON tc.travel_id=t.id
+    WHERE u.id=#{id}
+  </select>
+
+  <!--查所有收藏日报-->
+  <select id="getAllNewsPage" resultType="travel">
+    SELECT nP.*
+    FROM
+      user u
+      JOIN newsPage_collect npc ON u.id = npc.user_id
+      JOIN newsPage nP ON npc.newsPage_id=np.id
+    WHERE u.id=#{id}
+  </select>
+
+    <!-- 根据朋友圈关注的人 -->
+  <select id="selectFabulousByFriendId" resultType="user">
+    SELECT u.id,u.nickName
+    FROM user u JOIN friend_fabulous ff ON u.id = ff.user_id
+    WHERE friend_id=#{friendId}
+  </select>
+
+  <!-- 实时聊天 -->
+  <select id="listAllForChat" resultType="map">
+    SELECT id,nickName name,headImgUrl
+    from `user`
+  </select>
+
+
+    <select id="selectInsteres" resultMap="BaseResultMap1">
+      SELECT DISTINCT u1.id,u1.headImgUrl,u1.nickName,u1.fans
+      FROM `user` u1
+      LEFT JOIN travel t ON u1.id = t.author_id
+      WHERE u1.id  in
+      (SELECT id FROM `user` WHERE u1.id NOT in (SELECT focus_id
+      FROM friend_relation WHERE attention_id = #{userId}) AND u1.id != #{userId})
+      ORDER BY u1.fans DESC
+    </select>
+
+    <select id="selectCount" resultType="long">
+      SELECT count(id) FROM travel WHERE travel.author_id = #{id}
+    </select>
+
+    <select id="selectInsteres2" resultMap="BaseResultMap2">
+        SELECT DISTINCT u1.id,u1.headImgUrl,u1.nickName,u1.fans,c.nums,
+        ttt.id t_id,ttt.coverUrl t_coverUrl
+        FROM `user` u1
+        LEFT JOIN travel t ON u1.id = t.author_id
+        LEFT JOIN
+        (SELECT id,coverUrl,author_id FROM travel tt ORDER BY tt.releaseTime DESC LIMIT 3) ttt on ttt.author_id = u1.id
+        LEFT JOIN (SELECT author_id,count(id) nums FROM travel GROUP BY author_id) c ON c.author_id = u1.id
+        WHERE u1.id  in
+        (SELECT id FROM `user` WHERE u1.id NOT in (SELECT focus_id
+        FROM friend_relation WHERE attention_id = #{userId}) AND u1.id != #{userId})
+        ORDER BY u1.fans DESC
+    </select>
+
+</mapper>

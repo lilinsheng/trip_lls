@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.trip.base.mapper.FereMapper">
+  <resultMap id="BaseResultMap" type="cn.wolfcode.trip.base.domain.Fere">
+    <id column="id" property="id" />
+    <result column="coverUrl" property="coverUrl" />
+    <result column="title" property="title" />
+    <result column="days" property="days" />
+    <result column="goTime" property="goTime" />
+    <result column="content" property="content" />
+
+    <!--映射用户-->
+    <association property="user" javaType="User" columnPrefix="u_">
+      <id column="id" property="id"/>
+      <result column="sign" property="sign"/>
+      <result column="nickName" property="nickName"/>
+      <result column="headImgUrl" property="headImgUrl"/>
+    </association>
+
+    <!--映射地区-->
+    <association property="region" javaType="Region" columnPrefix="r_">
+      <id column="id" property="id"/>
+      <result column="name" property="name"/>
+    </association>
+
+  </resultMap>
+
+  <!--删除-->
+  <delete id="deleteByPrimaryKey">
+    delete from fere
+    where id = #{id}
+  </delete>
+
+  <!--新增-->
+  <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+    insert into fere (coverUrl, title, days, goTime, user_id, content, 
+      region_id)
+    values (#{coverUrl}, #{title}, #{days}, #{goTime}, #{user.id}, #{content}, 
+      #{region.id})
+  </insert>
+
+  <!--修改-->
+  <update id="updateByPrimaryKey">
+    update fere
+    set coverUrl = #{coverUrl},
+      title = #{title},
+      days = #{days},
+      goTime = #{goTime},
+      user_id = #{user.id},
+      content = #{content},
+      region_id = #{region.id}
+    where id = #{id}
+  </update>
+
+  <!--查单个-->
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+    select id, coverUrl, title, days, goTime, user_id, content, region_id
+    from fere
+    where id = #{id}
+  </select>
+
+  <!--查全部-->
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, coverUrl, title, days, goTime, user_id, content, region_id
+    from fere
+  </select>
+
+  <!--查全部结伴信息-->
+  <select id="selectForAll" resultMap="BaseResultMap">
+    select f.id, f.coverUrl, f.title, f.days, f.goTime, f.user_id, f.content, f.region_id,
+      u.id u_id, u.sign u_sign, u.nickName u_nickName, u.headImgUrl u_headImgUrl,
+      r.id r_id, r.name r_name
+    from fere f
+    LEFT JOIN user u ON f.user_id = u.id
+    LEFT JOIN region r ON f.region_id = r.id
+  </select>
+</mapper>
+

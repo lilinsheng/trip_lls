@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.trip.base.mapper.StrategyCommentMapper">
+  <resultMap id="BaseResultMap" type="cn.wolfcode.trip.base.domain.StrategyComment">
+    <id column="id" property="id" />
+    <result column="createTime" property="createTime" />
+    <result column="content" property="content" />
+    <result column="imgUrls" property="imgUrls" />
+    <result column="starNum" property="starNum" />
+    <result column="state" property="state" />
+    <result column="commendTime" property="commendTime" />
+
+      <!--映射用户-->
+    <association property="commentNum" select="cn.wolfcode.trip.base.mapper.StrategyDetailCommentMapper.selectCountById" column="id"/>
+  <association property="user" javaType="user">
+          <id column="u_id" property="id"/>
+      <result column="u_nickName" property="nickName"/>
+      <result column="u_headImgUrl" property="headImgUrl"/>
+  </association>
+
+    <!--映射攻略-->
+    <association property="strategy" javaType="strategy" columnPrefix="s_">
+      <id column="id" property="id"/>
+      <result column="coverUrl" property="coverUrl"/>
+      <result column="title" property="title"/>
+    </association>
+  </resultMap>
+
+
+  <delete id="deleteByPrimaryKey">
+    delete from strategycomment
+    where id = #{id}
+  </delete>
+  <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+    insert into strategycomment (user_id, createTime, content, imgUrls, starNum, strategy_id, 
+      state, commendTime)
+    values (#{user.id}, #{createTime}, #{content}, #{imgUrls}, #{starNum}, #{strategy.id}, 
+      #{state}, #{commendTime})
+  </insert>
+
+  <insert id="insertRelation">
+    INSERT INTO comment_tag(comment_id, tag_id) VALUES (#{commentId},#{tagId})
+  </insert>
+
+  <update id="updateByPrimaryKey">
+    update strategycomment
+    set user_id = #{user.id},
+      createTime = #{createTime},
+      content = #{content},
+      imgUrls = #{imgUrls},
+      starNum = #{starNum},
+      strategy_id = #{strategy.id},
+      state = #{state},
+      commendTime = #{commendTime}
+    where id = #{id}
+  </update>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+    select sc.id, sc.user_id, sc.createTime, sc.content, sc.imgUrls, sc.starNum, sc.strategy_id, sc.state, sc.commendTime,
+           u.nickName u_nickName,u.headImgUrl u_headImgUrl,
+           s.id s_id,s.coverUrl s_coverUrl,s.title s_title
+    from strategycomment sc JOIN user u ON sc.user_id = u.id
+    JOIN strategy s ON sc.strategy_id = s.id
+    where sc.id = #{id}
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, user_id, createTime, content, imgUrls, starNum, strategy_id, state, commendTime
+    from strategycomment
+  </select>
+
+
+  <select id="selectForList" resultMap="BaseResultMap">
+    select sc.id, sc.user_id, sc.createTime, sc.content, sc.imgUrls, sc.starNum, sc.strategy_id, sc.state, sc.commendTime,
+           u.nickName u_nickName,u.headImgUrl u_headImgUrl
+    from strategycomment sc JOIN user u ON sc.user_id = u.id
+    <where>
+      <if test="strategyId!=null">
+        AND sc.strategy_id = #{strategyId}
+      </if>
+    </where>
+  </select>
+
+  <!--查指定用户的评论-->
+  <select id="queryStrategyComments" resultMap="BaseResultMap">
+    SELECT sc.*,
+    u.id u_id,  u.headImgUrl u_headImgUrl,
+    s.id s_id,s.coverUrl s_coverUrl,s.title s_title
+    FROM strategycomment sc
+    JOIN user u ON u.id = sc.user_id
+    JOIN strategy s ON sc.strategy_id = s.id
+    <where>
+      <if test="StrategyCommentId!=null">
+        AND sc.user_id = #{StrategyCommentId}
+      </if>
+    </where>
+  </select>
+
+
+</mapper>

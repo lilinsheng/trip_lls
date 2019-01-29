@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+	<head lang="en">
+		<title>可能感兴趣的人</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<link rel="stylesheet" href="/js/bootstrap-4.1.1-dist/css/bootstrap.min.css">
+		<script src="/js/jquery/jquery.min.js"></script>
+		<script src="/js/bootstrap-4.1.1-dist/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="/css/font/css/font-awesome.min.css"/>
+		<link rel="stylesheet" href="/css/reset.css"/>
+		<link rel="stylesheet" href="/css/strategyComment.css" />
+		<link rel="stylesheet" href="/css/strategyCatalogs.css" />
+		<script src="/js/plugins/jrender/jrender.min.js"></script>
+		<script src="/js/common.js"></script>
+		
+		<script>
+			$(function () {
+				$.get("/interes/1",function (data) {
+                    console.log(data);
+                    $('.container').renderValues({list:data},{
+                        getHref:getHref
+                    })
+                })
+			})
+		</script>
+	</head>
+
+	<body>
+	<div class="search-head">
+		<div class="row nav-search">
+			<div class="col">
+				<a href="/index.html">
+					<span><i class="fa fa-chevron-left"></i></span>
+				</a>
+			</div>
+			<div class="col">
+				<span>可能感兴趣的人</span>
+			</div>
+			<div class="col"></div>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="comment">
+			<div render-loop="list">
+				<div class="row">
+					<div class="col-2 comment-head">
+						<a data-href="/userProfiles.html?id=" render-fun="getHref" render-key="list.id">
+							<img class="rounded-circle" render-src="list.headImgUrl">
+						</a>
+						<button class="btn"  ><i class="fa fa-hand-o-right" > </i> 关注</button>
+					</div>
+					<div class="col comment-right">
+						<p class="authorName"><span render-html="list.nickName"></span></p>
+						<div class="comment-content" style="color: #818182;font-size: 12px">
+							<label><span render-html="list.travelNums"></span>篇游记</label>
+							<label><span render-html="list.fans"></span>粉丝</label>
+						</div>
+
+						<ul class="comment-img" render-loop="list.travels" >
+							<li>
+								<a data-href="/travelContent.html?id=" render-fun="getHref" render-key="list.travels.id">
+									<img render-src="list.travels.coverUrl">
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+
+
+			</div>
+
+		</div>
+	</div>	
+
+
+
+	</body>
+
+</html>

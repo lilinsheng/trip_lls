@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.trip.base.mapper.OrderMapper">
+  <resultMap id="BaseResultMap" type="cn.wolfcode.trip.base.domain.Order">
+    <id column="id" property="id" />
+    <result column="date" property="date" />
+    <result column="touristName" property="touristName" />
+    <result column="address" property="address" />
+    <result column="phone" property="phone" />
+    <result column="orderNum" property="orderNum" />
+      <association property="ticket" javaType="scenic" columnPrefix="s_">
+          <id column="id" property="id"/>
+          <result column="title" property="title"/>
+          <result column="imgUrl" property="imgUrl"/>
+          <result column="price" property="price"/>
+          <result column="region" property="region"/>
+      </association>
+  </resultMap>
+  <delete id="deleteByPrimaryKey">
+    delete from `order`
+    where id = #{id}
+  </delete>
+  <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+    insert into `order` (date, ticket_id, user_id, touristName, address, phone,
+      orderNum,createTime)
+    values (now(), #{ticket.id}, #{user.id}, #{touristName}, #{address}, #{phone},
+      #{orderNum},now())
+  </insert>
+  <update id="updateByPrimaryKey">
+    update `order`
+    set date = #{date},
+      ticket_id = #{ticket.id},
+      user_id = #{user.id},
+      touristName = #{touristName},
+      address = #{address},
+      phone = #{phone},
+      orderNum = #{orderNum}
+    where id = #{id}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+    select id, date, ticket_id, user_id, touristName, address, phone, orderNum
+    from `order`
+    where id = #{id}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, date, ticket_id, user_id, touristName, address, phone, orderNum
+    from `order`
+  </select>
+
+
+    <select id="selectById" resultMap="BaseResultMap">
+        select o.id, o.date, o.ticket_id, o.user_id, o.touristName, o.address, o.phone, o.orderNum,o.createTime,
+            s.id s_id,s.title s_title,s.imgUrl s_imgUrl,s.price s_price,s.region s_region
+        from `order` o JOIN scenic s ON o.ticket_id = s.id
+        WHERE o.user_id = #{userId} ORDER BY o.createTime desc
+    </select>
+</mapper>

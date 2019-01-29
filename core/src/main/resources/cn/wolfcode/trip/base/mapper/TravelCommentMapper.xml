@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.trip.base.mapper.TravelCommentMapper">
+  <resultMap id="BaseResultMap" type="cn.wolfcode.trip.base.domain.TravelComment">
+    <id column="id" property="id" />
+    <result column="createTime" property="createTime" />
+    <result column="content" property="content" />
+    <result column="parent_id" property="parentId" />
+    <result column="state" property="state" />
+      <association property="travel" javaType="travel" columnPrefix="travel _">
+          <id column="id" property="id"/>
+          <result column="title" property="title"/>
+          <result column="coverUrl" property="coverUrl"/>
+      </association>
+    <association property="user" javaType="user" columnPrefix="u_">
+      <id column="id" property="id"/>
+      <result column="nickName" property="nickName"/>
+      <result column="headImgUrl" property="headImgUrl"/>
+    </association>
+    <collection property="comments" select="cn.wolfcode.trip.base.mapper.TravelCommentMapper.selectCommentsByTravelIdSon" column="{travelId=travel_id,parentId=id}"></collection>
+  </resultMap>
+
+    <resultMap id="BaseResultMap1" type="cn.wolfcode.trip.base.domain.TravelComment">
+        <id column="id" property="id" />
+        <result column="createTime" property="createTime" />
+        <result column="content" property="content" />
+        <association property="travel" javaType="travel">
+            <id column="travel_id" property="id"/>
+            <result column="travel_title" property="title"/>
+            <result column="travel_coverUrl" property="coverUrl"/>
+        </association>
+    </resultMap>
+
+
+  <delete id="deleteByPrimaryKey">
+    delete from travelcomment
+    where id = #{id}
+  </delete>
+  <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+    insert into travelcomment (user_id, createTime, content, travel_id, parent_id, state
+      )
+    values (#{user.id}, now(), #{content}, #{travel.id}, #{parentId}, 1
+      )
+  </insert>
+  <update id="updateByPrimaryKey">
+    update travelcomment
+    set user_id = #{user.id},
+      createTime = #{createTime},
+      content = #{content},
+      travel_id = #{travel.id},
+      parent_id = #{parentId},
+      state = #{state}
+    where id = #{id}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+    select id, user_id, createTime, content, travel_id, parent_id, state
+    from travelcomment
+    where id = #{id}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, user_id, createTime, content, travel_id, parent_id, state
+    from travelcomment
+  </select>
+
+  <!-- 根据游记查询评论 -->
+  <select id="selectCommentsByTravelId" resultMap="BaseResultMap">
+    SELECT tc.id,tc.createTime,tc.content,tc.travel_id,tc.parent_id,
+    u.id u_id,u.nickName u_nickName,u.headImgUrl u_headImgUrl
+    FROM travelcomment tc JOIN user u ON tc.user_id = u.id
+    WHERE tc.travel_id = #{travelId} AND parent_id is NULL
+  </select>
+
+  <!-- 查询子级评论 -->
+  <select id="selectCommentsByTravelIdSon" resultMap="BaseResultMap">
+    SELECT tc.id,tc.createTime,tc.content,tc.travel_id,tc.parent_id,
+    u.id u_id,u.nickName u_nickName,u.headImgUrl u_headImgUrl
+    FROM travelcomment tc JOIN user u ON tc.user_id = u.id
+    WHERE tc.travel_id = #{travelId} AND parent_id = #{parentId}
+  </select>
+
+    <!-- 查询我的游记评论 -->
+    <select id="selectMyTravelComment" resultMap="BaseResultMap1">
+        SELECT tc.id ,tc.content ,tc.createTime,
+            t.id travel_id, t.title travel_title, t.coverUrl travel_coverUrl
+        FROM  travelcomment tc JOIN travel t ON t.id=tc.travel_id
+        WHERE tc.user_id=#{userId}
+    </select>
+
+</mapper>

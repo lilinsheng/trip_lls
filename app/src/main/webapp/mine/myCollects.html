@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="/js/bootstrap-4.1.1-dist/css/bootstrap.min.css">
+    <script src="/js/jquery/jquery.min.js"></script>
+    <script src="/js/bootstrap-4.1.1-dist/js/bootstrap.min.js"></script>
+    <script src="/js/plugins/jrender/jrender.min.js"></script>
+    <link rel="stylesheet" href="/css/font/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="/css/reset.css" />
+    <link rel="stylesheet" href="/css/userTravels.css" />
+    <link rel="stylesheet" href="/js/plugins/dialog2/dialog.css" />
+    <script src="/js/plugins/dialog2/dialog.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        var user =JSON.parse( sessionStorage.getItem("user"));
+        var params= getParams();
+        var state=params.state;
+        $(function () {
+            if(state==1){
+                $("#supTitle").html("我收藏的攻略");
+                //!*当前页*!/
+                var currentPage = 1;
+                //!*总页数*!/
+                var pages;
+                //!*页面集合*!/
+                var messages = [];
+                //!*查询我的游记函数*!/
+                function search() {
+                    $.get("/collects/getAllStravel",{"currentPage":currentPage,"userId":user.id,"state":state},function (data) {
+                        //console.log(data);
+                        //根据查询的结果为总页数赋值
+                        pages = data.pages;
+                        //将之前的所有的游记加到已有的页面集合中
+                        data.list=$.merge(messages,data);
+                        //将数据渲染到页面上
+                        $(".travels").renderValues(data,{
+                            //这个是根据render-fun所定义的函数，在渲染的时候执行，
+                            // 参数1为设置render-key和fun参数的元素
+                            // 参数2为render-key中所设置的值/
+                            Href:function (item,value) {
+                                //将跳转的页面后面加上当前
+
+                                $(item).attr("href","/strategyCatalogs.html?id="+value);
+
+                                $(item).attr("data-type",value);
+                            }
+                        });
+                        $.each($("dd"),function (index,value) {
+                            $.get("/collects/"+ $(value).find("a").data("type")+"/"+state,function (data) {
+                                $(value).find(".collectNumber").html(data);
+                            })
+                        });
+                        //!*没执行一次查询当前页加1*!/
+                        currentPage++;
+                    });
+
+                }
+
+
+            }else if(state==2)
+            {
+                $("#supTitle").html("我收藏的游记");
+
+                /*当前页*/
+                var currentPage = 1;
+                /*总页数*/
+                var pages;
+                /*页面集合*/
+                var messages = [];
+                /*查询我的游记函数*/
+                function search() {
+                    $.get("/collects/getTravelCollect",{"currentPage":currentPage,"userId":user.id,"state":state},function (data) {
+                        console.log(data);
+                        /*根据查询的结果为总页数赋值*/
+                        pages = data.pages;
+                        /*将之前的所有的游记加到已有的页面集合中*/
+                        data.list=$.merge(messages,data);
+                        /*将数据渲染到页面上*/
+                        $(".travels").renderValues(data,{
+                            /*这个是根据render-fun所定义的函数，在渲染的时候执行，
+                            参数1为设置render-key和fun参数的元素
+                            参数2为render-key中所设置的值*/
+
+                            Href:function (item,value) {
+                                //console.log(value);
+                                /*将跳转的页面后面加上当前*/
+                                $(item).attr("href","/mine/travelContent.html?id="+value);
+
+                                $(item).attr("data-type",value);
+                            }
+                        });
+                        $.each($("dd"),function (index,value) {
+                            $.get("/collects/"+ $(value).find("a").data("type")+"/"+state,function (data) {
+                                $(value).find(".collectNumber").html(data);
+                            })
+                        });
+                        /*没执行一次查询当前页加1*/
+                        currentPage++;
+                    });
+
+
+
+                }
+
+
+
+            }else if(state==3){
+                $("#supTitle").html("我收藏的日报");
+
+                //!*当前页*!/
+                var currentPage = 1;
+                //!*总页数*!/
+                var pages;
+                //!*页面集合*!/
+                var messages = [];
+                //!*查询我的游记函数*!/
+                function search() {
+                    $.get("/collects/getNewsPageCollect",{"currentPage":currentPage,"userId":user.id,"state":state},function (data) {
+                        //console.log(data);
+                        //!*根据查询的结果为总页数赋值*!/
+                        pages = data.pages;
+                        //!*将之前的所有的游记加到已有的页面集合中*!/
+                        data.list=$.merge(messages,data);
+                        //!*将数据渲染到页面上*!/
+                        $(".travels").renderValues(data,{
+                            //!*这个是根据render-fun所定义的函数，在渲染的时候执行，
+                            // 参数1为设置render-key和fun参数的元素
+                            //参数2为render-key中所设置的值
+                            Href:function (item,value) {
+                                //!*将跳转的页面后面加上当前*!/
+                                $(item).attr("href","/dailyContent.html?id="+value);
+
+                                $(item).attr("data-type",value);
+                            }
+                        });
+                        $.each($("dd"),function (index,value) {
+                            $.get("/collects/"+ $(value).find("a").data("type")+"/"+state,function (data) {
+                                $(value).find(".collectNumber").html(data);
+                            })
+                        });
+                        //!*没执行一次查询当前页加1*!/
+                        currentPage++;
+                    });
+
+                }
+
+            }
+
+            /*当页面第一次加载时查询一次*/
+            search();
+            /*这个是监控屏幕滑动的事件*/
+            $(window).scroll(function () {
+                /*判断当我们滑动页面的时候是否滑到当前文档最底层三个方法一词代表
+                * 1.窗口的高度，2.文档高度相对于窗口的偏移量3.文档的偏移量*/
+                if($(window).height()+$(document).scrollTop()>=$(document).height()-1){
+                    /*判断当前页是否小于最大的页数*/
+                    if(currentPage<=pages){
+                        search();
+                    }else{
+
+                        $(document).dialog({
+                            type: 'notice',
+                            infoText: '已经到底部了',
+                            autoClose: 1000,
+                            position: 'bottom'  // center: 居中; bottom: 底部
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+</head>
+
+<body>
+<div class="search-head">
+    <div class="row nav-search">
+        <div class="col">
+            <a href="/mine/collect.html">
+                <span><i class="fa fa-chevron-left"></i></span>
+            </a>
+        </div>
+        <div class="col">
+            <span id="supTitle">我的游记</span>
+        </div>
+        <div class="col"></div>
+    </div>
+</div>
+<div class="container travels">
+    <dl class="list" render-loop="list">
+        <dd>
+            <a  render-key="list.id" render-fun="Href">
+                <img render-src="list.coverUrl">
+                <h6 class="title" render-html="list.title" ></h6>
+                <p>最近更新时间 <span render-html="list.createTime"></span>
+                    <span class="span-right">
+							  <i class="fa fa-heart"></i><span render-key="list.typeId" render-fun="getType" class="collectNumber"></span>收藏
+						  <i class="fa fa-thumbs-o-up"></i><span>0</span>点赞</span>
+                </p>
+            </a>
+        </dd>
+    </dl>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.trip.base.mapper.TravelMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.trip.base.domain.Travel">
+        <id column="id" property="id" />
+        <result column="title" property="title" />
+        <result column="travelTime" property="travelTime" />
+        <result column="perExpends" property="perExpends" />
+        <result column="days" property="days" />
+        <result column="person" property="person" />
+        <result column="createTime" property="createTime" />
+        <result column="releaseTime" property="releaseTime" />
+        <result column="isPublic" property="isPublic" />
+        <result column="coverUrl" property="coverUrl" />
+        <result column="lastUpdateTime" property="lastUpdateTime" />
+        <result column="state" property="state" />
+        <result column="fabulousnum" property="fabulousNum"/>
+        <result column="collectionnum" property="collectionNum"/>
+        <association property="commentNum" select="cn.wolfcode.trip.base.mapper.TravelMapper.selectCommentById" column="id"></association>
+        <association property="travelContent" javaType="travelContent">
+            <id column="id" property="id"/>
+            <result column="content" property="content"/>
+        </association>
+        <association property="place" javaType="region">
+            <id column="r_id" property="id"/>
+            <result column="r_name" property="name"/>
+        </association>
+        <association property="author" javaType="user">
+            <id column="u_id" property="id"/>
+            <result column="u_nickName" property="nickName"/>
+            <result column="u_headImgUrl" property="headImgUrl"/>
+            <result column="u_fans" property="fans"/>
+        </association>
+    </resultMap>
+    <delete id="deleteByPrimaryKey">
+        DELETE FROM travel
+        WHERE id = #{id}
+    </delete>
+
+    <!-- 删除点赞关系 -->
+    <delete id="deleteFabulous">
+        DELETE FROM travel_fabulous WHERE user_id = #{userId} AND travel_id=#{travelId}
+    </delete>
+
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO travel (title, travelTime, perExpends, days, person, author_id,
+        createTime,  isPublic, place_id, coverUrl, lastUpdateTime,
+        state)
+        VALUES (#{title}, #{travelTime}, #{perExpends}, #{days}, #{person}, #{author.id},
+        #{createTime},  #{isPublic}, #{place.id}, #{coverUrl}, #{lastUpdateTime},
+        #{state})
+    </insert>
+
+    <!-- 保存游记点赞关系 -->
+    <insert id="saveFabulous">
+        INSERT INTO travel_fabulous (user_id, travel_id, state, createTime)
+        VALUES (#{userId},#{travelId},1,now());
+    </insert>
+
+    <!-- 保存游记收藏的关系 -->
+    <insert id="insertCollectionRelation">
+        INSERT INTO travel_collect (user_id, travel_id)
+        VALUES (#{userId},#{travelId})
+    </insert>
+
+    <update id="updateByPrimaryKey">
+        UPDATE travel
+        SET title = #{title},
+        travelTime = #{travelTime},
+        perExpends = #{perExpends},
+        days = #{days},
+        person = #{person},
+        isPublic = #{isPublic},
+        place_id = #{place.id},
+        coverUrl = #{coverUrl},
+        lastUpdateTime = #{lastUpdateTime},
+        state = #{state}
+        WHERE id = #{id}
+    </update>
+
+    <!--更新游记状态-->
+    <update id="updateState">
+        UPDATE travel
+        SET releaseTime = #{releaseTime},
+        state = #{state},
+        inform = #{inform}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 更新游记的点赞数 -->
+    <update id="updateFabulousNumber">
+        UPDATE travel SET fabulousnum = fabulousnum+1
+        WHERE id=#{id}
+    </update>
+
+    <!-- 取消点赞关系 -->
+    <update id="updateReductFabulous">
+        UPDATE travel SET fabulousnum = fabulousnum-1
+        WHERE id=#{id}
+    </update>
+
+    <!-- 添加游记的收藏数 -->
+    <update id="updateAddCollectTravel">
+        UPDATE travel SET collectionnum = travel.collectionnum+1
+        WHERE id = #{travelId}
+    </update>
+
+    <!-- 减少游记的收藏数 -->
+    <update id="updateReductCollectTravel">
+        UPDATE travel SET collectionnum = travel.collectionnum-1
+        WHERE id = #{travelId}
+    </update>
+
+    <!-- 通知查看后,状态改为已查看 -->
+    <update id="updateInform">
+        UPDATE travel
+        SET inform = -3
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+        SELECT t.id, t.title, t.travelTime, t.perExpends, t.days, t.person, t.author_id, t.createTime, t.releaseTime,
+        t.isPublic, t.place_id, t.coverUrl, t.lastUpdateTime, t.state,t.fabulousnum,t.collectionnum,
+        tc.content,r.id r_id,r.name r_name,
+        u.id u_id,u.headImgUrl u_headImgUrl,u.nickName u_nickName,u.fans u_fans
+        FROM travel t JOIN travelcontent tc ON t.id = tc.id
+        JOIN region r ON t.place_id = r.id
+        JOIN user u ON t.author_id = u.id
+        WHERE t.id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT id, title, travelTime, perExpends, days, person, author_id, createTime, releaseTime,
+        isPublic, place_id, coverUrl, lastUpdateTime, state
+        FROM travel
+    </select>
+
+    <!-- 分页查询游记 -->
+    <select id="selectTravel" resultMap="BaseResultMap" parameterType="cn.wolfcode.trip.base.query.TravelQueryObject">
+        SELECT	t.id,t.title,t.travelTime,t.perExpends,
+        t.days,t.person,t.createTime,t.releaseTime,
+        t.isPublic,t.coverUrl,t.lastUpdateTime,t.state,t.collectionnum,t.fabulousnum,
+        tc.content,
+        r.id r_id,r.name r_name,
+        u.id u_id,u.nickName u_nickName,u.headImgUrl u_headImgUrl
+        FROM travel t JOIN user u ON t.author_id = u.id
+        JOIN travelcontent tc ON t.id = tc.id
+        JOIN region r ON t.place_id = r.id
+        <where>
+            <if test="authorId!=null">
+                AND t.author_id = #{authorId}
+            </if>
+            <if test="state!=null and state > -2">
+                AND t.state = #{state}
+            </if>
+            <if test="isPublic!=null">
+                AND t.isPublic = #{isPublic}
+            </if>
+            <if test="travelId!=null">
+                AND t.id = #{travelId}
+            </if>
+            <if test="keyword!=null">
+                AND (t.title LIKE CONCAT('%',#{keyword},'%') OR u.nickName LIKE CONCAT('%',#{keyword},'%'))
+            </if>
+        </where>
+    </select>
+
+    <!-- 根据游记id查询游记点赞数 -->
+    <select id="selectFabulousByTravel" resultType="int">
+        SELECT fabulousnum FROM travel WHERE id = #{id}
+    </select>
+
+    <!-- 获取游记的收藏数量-->
+    <select id="selectTravelCollection" resultType="_int">
+        SELECT collectionnum FROM travel
+        WHERE id = #{travelId}
+    </select>
+
+
+    <!--查游记-->
+    <select id="getTraversCounts" resultMap="BaseResultMap">
+        select t.*,
+        u.id u_id, u.nickName u_nickName
+        from travel t
+        LEFT JOIN user u ON u.id=t.author_id
+        <where>
+            <if test="keyword!=null">
+                AND (title LIKE CONCAT('%',#{keyword},'%') OR nickName LIKE CONCAT('%',#{keyword},'%'))
+            </if>
+        </where>
+    </select>
+
+
+  <!-- 获取当前游记评论的数量-->
+  <select id="selectCommentById" resultType="long">
+    SELECT count(id) FROM travelcomment
+    WHERE travel_id=#{id}
+  </select>
+
+    <!--查全部游记不分页-->
+    <select id="selectAlltravel" resultMap="BaseResultMap">
+        SELECT id, title, travelTime, perExpends, days, person, author_id, createTime, releaseTime,
+        isPublic, place_id, coverUrl, lastUpdateTime, state
+        FROM travel
+    </select>
+
+    <!-- 移除游记收藏关系 -->
+    <delete id="deleteCollectionRelation">
+        DELETE FROM travel_collect
+        WHERE user_id=#{userId} AND travel_id=#{travelId}
+    </delete>
+
+    <select id="selectTravelByAuthorId" resultType="travel">
+        SELECT id,coverUrl FROM travel WHERE author_id = #{id}
+        ORDER BY releaseTime DESC
+    </select>
+</mapper>

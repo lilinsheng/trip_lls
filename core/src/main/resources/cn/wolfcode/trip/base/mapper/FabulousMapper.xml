@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.trip.base.mapper.FabulousMapper">
+    <!-- 把未查看状态改为已查看:游记的 -->
+    <update id="updateTravelState">
+        UPDATE travel_fabulous
+        SET state = 0
+        WHERE travel_id = #{id}
+    </update>
+    <!-- 把未查看状态改为已查看:朋友圈的 -->
+    <update id="updateFriendState">
+        UPDATE friend_fabulous
+        SET state = 0
+        WHERE friend_id = #{id}
+    </update>
+
+    <!-- 查看当前用户未被查看的游记点赞数 -->
+    <select id="selectUnreadTravelCount" resultType="int">
+        SELECT count(0) FROM travel_fabulous WHERE state = 1 AND user_id = #{userId}
+    </select>
+
+    <!-- 查看当前用户未被查看的朋友圈动态点赞数 -->
+    <select id="selectUnreadFriendCount" resultType="int">
+        SELECT count(0) FROM friend_fabulous fabulous
+        JOIN friend ON fabulous.friend_id = friend.id
+        WHERE state = 1 AND friend.user_id = #{userId}
+    </select>
+
+    <!-- 查询点赞历史:点赞者的名称,点赞内容的内容,点赞的类型 -->
+    <select id="selectFabulousHistory" resultType="map">
+        (SELECT DATE_FORMAT(fabulous.createTime,'%Y-%m-%d %T') createTime,fabulous.state,2 type,
+        travel.title show_content,travel.id hrefId,
+        visitor.id visitor_id,visitor.headImgUrl visitor_headImgUrl,visitor.nickName visitor_nickName
+        FROM travel_fabulous fabulous
+        JOIN user visitor ON fabulous.user_id = visitor.id
+        JOIN travel ON fabulous.travel_id = travel.id
+        WHERE travel.author_id = #{userId}
+        )
+        UNION ALL
+        (SELECT DATE_FORMAT(fabulous.createTime,'%y-%m-%d %T') createTime,fabulous.state,4,
+        friend.content show_content,friend.id hrefId,
+        visitor.id visitor_id,visitor.headImgUrl visitor_headImgUrl,visitor.nickName visitor_nickName
+        FROM friend_fabulous fabulous
+        JOIN user visitor ON fabulous.user_id = visitor.id
+        JOIN friend ON fabulous.friend_id = friend.id
+        WHERE friend.user_id = #{userId}
+        )
+        ORDER BY state DESC,createTime DESC
+    </select>
+</mapper>

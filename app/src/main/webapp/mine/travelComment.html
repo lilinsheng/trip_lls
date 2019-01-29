@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+	<title>找攻略</title>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<link rel="stylesheet" href="/js/bootstrap-4.1.1-dist/css/bootstrap.min.css">
+	<script src="/js/jquery/jquery.min.js"></script>
+	<script src="/js/bootstrap-4.1.1-dist/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="/css/font/css/font-awesome.min.css"/>
+	<link rel="stylesheet" href="/css/reset.css"/>
+	<link rel="stylesheet" href="/css/strategyComment.css"/>
+	<script src="/js/plugins/jrender/jrender.min.js"></script>
+	<link rel="stylesheet" href="/js/plugins/dialog2/dialog.css"/>
+	<script src="/js/plugins/dialog2/dialog.min.js"></script>
+	<script src="/js/common.js"></script>
+	<link rel="stylesheet" href="/css/common.css"/>
+	<script type="text/javascript">
+        var w, h, className;
+
+        function getSrceenWH() {
+            w = $(window).width();
+            h = $(window).height();
+            $('#dialogBg').width(w).height(h);
+        }
+
+        window.onresize = function () {
+            getSrceenWH();
+        }
+        $(window).resize();
+
+        $(function () {
+            var params = getParams()
+            var usern = JSON.parse(sessionStorage.getItem('user'));
+            var currentPage = 1;//当前页
+            var pages;//总页数
+            var commentData = [];//定义一个数组用来接收每次分页时的数据
+            function query() {//记得传递当前页这个参数
+                //根据攻略id获得其对应的评论信息
+                $.get("/travelComments/" + params.id+"/comments", {pageSize: 4, currentPage: currentPage}, function (data) {
+                    console.log(data);
+                    $.merge(commentData, data.list);
+                    var json = {
+                        list: commentData
+                    };
+                    $("#travelCom").renderValues(json, {
+                        getHref: function (item, value) {
+                            var url = $(item).data("href");
+                            $(item).attr("href", url + value);
+                        },
+                        getCommentID: function (item, value) {
+                            $(item).attr("data-id", value);
+                        }
+                    });
+
+                    //显示弹框
+                    $('.travelCommentBtn').click(function () {
+                        var commentBtn = $(this);
+                        className = $(this).attr('class');
+                        $('#dialogBg').fadeIn(300);
+                        $('#dialog').removeAttr('class').addClass('animated ' + className + '').fadeIn();
+                        $('.submitBtn').unbind("click");//清除原有的点击事件
+                        $('.submitBtn').click(function () {
+                            $.ajax({
+                                url:"/travelComments",
+                                type:"post",
+                                data:{
+                                    "travel.id":params.id,
+                                    content:$('#content').val(),
+                                    parentId:commentBtn.data("id")
+                                },
+                                success:function (data) {
+									window.location.reload();
+                                }
+                            })
+                        });
+                    });
+
+                    pages = data.pages;
+                })
+                currentPage++;
+            }
+
+            query();
+            //监听滚动事件,当滚动条发生变化时触发
+            $(window).scroll(function () {
+                //document滚上去的高度+手机窗口的高度 >= 整个文档的高度
+                if (($(document).scrollTop() + $(window).height()) >= $(document).height() - 1) {
+                    if (currentPage <= pages) {//如果当前页数小于等于总页数
+                        query();
+                    } else {
+                        $(document).dialog({
+                            type: 'notice',
+                            content: '<span class="info-text">我是有底线的!</span>',
+                            autoClose: 1000,
+                            position: 'bottom'
+                        });
+                    }
+                }
+            });
+            /*getSrceenWH();*/
+            //获取游记评论对象的信息
+            if (params.id) {
+                $.get("/travels/" + params.id, function (data) {
+                    console.log(data);
+                    $("#containerBtn").renderValues(data, {
+                        getHref:getHref
+                    });
+                });
+
+            }
+
+
+            //关闭弹窗
+            $('.claseDialogBtn').click(function () {
+                $('#dialogBg').fadeOut(300, function () {
+                    $('#dialog').addClass('bounceOutUp').fadeOut();
+                });
+            });
+        });
+	</script>
+</head>
+
+<body>
+<div class="search-head">
+	<div class="row nav-search">
+		<div class="col">
+			<a href="javascript:history.go(-1);" style="position: absolute;top: 3px;left: 22px;">
+				<span><i class="fa fa-chevron-left fa-2x" style="color: white;"></i></span>
+			</a>
+		</div>
+		<div class="col">
+			<span>点评详情</span>
+		</div>
+		<div class="col"></div>
+	</div>
+</div>
+
+<div class="comment">
+	<div class="container" id="containerBtn">
+		<div>
+			<div class="row">
+				<div class="col-2 comment-head">
+					<a data-href="/userProfiles.html?id=" render-fun="getHref" render-key="author.id">
+						<img class="rounded-circle" render-src="author.headImgUrl">
+					</a>
+					<!--<button class="btn" id="followBtn"><i class="fa fa-hand-o-right"> </i> 关注</button>-->
+				</div>
+				<div class="col">
+					<a  style="font-size: 10px;color: #61CAD0" render-html="author.nickName"></a>
+					<span class="comment-date" render-html="createTime"></span>
+					<a data-href="/travelContent.html?id=" render-fun="getHref" render-key="id">
+						<div class="comment-content">
+							<p render-html="title"></p>
+						</div>
+						<ul class="comment-img">
+							<li>
+								<img render-src="coverUrl">
+							</li>
+						</ul>
+					</a>
+				</div>
+			</div>
+		</div>
+		<div class="count d-flex justify-content-between">
+			<div class="p-2"><span></span></div>
+			<div class="p-2">评论<span render-html="commentNum"></span></div>
+		</div>
+	</div>
+</div>
+<div id="travelCom" class="container">
+	<div render-loop="list"><!--快来发表你的评论吧-->
+		<div class="row">
+			<div class="col-2 comment-head">
+				<a data-href="/userProfiles.html?id=" render-key="list.user.id" render-fun="getHref">
+					<img class="rounded-circle" render-src="list.user.headImgUrl">
+				</a>
+			</div>
+			<div class="col">
+				<a style="font-size: 10px;color: #61CAD0" render-html="list.user.nickName"></a>
+				<span class="comment-date" render-html="list.commentdate"></span>
+				<span class="travelCommentBtn" render-key="list.id" render-fun="getCommentID">回复</span>
+				<div class="comment-content">
+					<p render-html="list.content"></p>
+				</div>
+				<hr/>
+				<div id="commentReplyBtn">
+					<div render-loop="list.comments">
+						<div class="row">
+							<div class="col-2 comment-head">
+								<a data-href="/userProfiles.html?id=" render-fun="getHref"
+								   render-key="list.comments.user.id">
+									<img class="rounded-circle" render-src="list.comments.user.headImgUrl">
+								</a>
+							</div>
+							<div class="col">
+								<a style="font-size: 10px;color: #61CAD0"
+								   render-html="list.comments.user.nickName"></a>
+								<span style="font-size: 10px" class="comment-date" render-html="list.comments.commentdate"></span>
+								<div class="comment-content">
+									<p render-html="list.comments.content"></p>
+								</div>
+								<!--<ul class="comment-img">
+                                    <li>
+                                        <img render-src="coverUrl">
+                                    </li>
+                                </ul>-->
+								<hr/>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="operation">
+	<div class="d-flex justify-content-between">
+		<div class="p-2"><i class="fa fa-commenting-o"></i>
+			<a href="javascript:;" class="travelCommentBtn flipInX"> 添加你的评论</a>
+		</div>
+		<!--<div class="p-2"><i class="fa fa-star-o"></i> 收藏</div>-->
+	</div>
+</div>
+<!--回复相关的弹框-->
+<div id="wrapper">
+	<div class="box">
+		<!--<div class="demo">
+            <a href="javascript:;" class="bounceIn">DEMO1</a>
+            <a href="javascript:;" class="rollIn">DEMO2</a>
+            <a href="javascript:;" class="bounceInDown">DEMO3</a>
+            <a href="javascript:;" class="flipInX">DEMO4</a>
+        </div>-->
+		<div id="dialogBg"></div>
+		<div id="dialog" class="animated">
+			<img class="dialogIco" width="50" height="50" src="/images/ico.png" alt=""/>
+			<div class="dialogTop">
+				<a href="javascript:;" class="claseDialogBtn">关闭</a>
+			</div>
+			<form action="" method="post" id="editForm">
+				<input type="hidden" name="commentId" id="commentId">
+				<ul class="editInfos">
+					<li><label><font color="#ff0000">* </font>评论内容：<input type="text" name="content" id="content"
+																		  required
+																		  class="ipt"/></label></li>
+					<!--<li><label><font color="#ff0000">* </font>图片：<input type="file" style="width: 190px"
+                                                                        name="commentImgUrl"
+                                                                        id="commentImgUrl"
+                                                                        class="ipt"/></label></li>-->
+					<!--  <li><label><font color="#ff0000">* </font>地址：<input type="text" name="" required value=""
+                                                                         class="ipt"/></label></li>-->
+					<li><input type="button" value="确认提交" class="submitBtn"/></li>
+				</ul>
+			</form>
+		</div>
+	</div>
+
+</div>
+<div style="text-align:center;margin:50px 0; font:normal 14px/24px 'MicroSoft YaHei';">
+</div>
+
+
+</body>
+</html>

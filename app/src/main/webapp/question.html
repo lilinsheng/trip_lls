@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+	<title>骡窝窝问答</title>
+	<meta name="viewport"
+		  content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no,minimal-ui,viewport-fit=cover">
+	<meta name="format-detection" content="telephone=no,address=no">
+
+	<link href="/css/font/mobile+css+head_mobile+css+ui%5Eyvw%5E1526627473.css" rel="stylesheet" type="text/css">
+
+	<link href="/css/new_ask2016.css" rel="stylesheet" type="text/css">
+	<script src="/js/jquery/jquery.min.js"></script>
+	<script type="text/javascript" src="/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+	<script src="/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+	<script src="/js/jquery.bootstrap.min.js"></script>
+	<script src="/js/My97DatePicker/WdatePicker.js"></script>
+	<script src="/js/plugins/form/jquery.form.js"></script>
+	<script src="/js/plugins/jrender/jrender.min.js"></script>
+	<link rel="stylesheet" href="/js/plugins/dialog2/dialog.css"/>
+	<script src="/js/plugins/dialog2/dialog.min.js"></script>
+	<script src="/js/common.js"></script>
+	<link rel="stylesheet" href="/bootstrap-3.3.7-dist/css/bootstrap.min.css" type="text/css" />
+
+	<script>
+        function successAlert(data) {
+            if (data.success){
+                $.messager.alert("操作成功，2秒后跳转");
+                setTimeout(function () {
+                    window.location.reload();
+                }, 2000);
+            }
+        }
+
+        $(function () {
+
+            //当前页
+            var currentPage = 1;
+
+            //最大页数
+            var pages;
+
+            //合并数组
+            var travelArr = [];
+
+            function query() {
+                $.get("/questions",{currentPage:currentPage},function (data) {
+                    console.log(data);
+                    $.merge(travelArr,data.list);
+                    $('.a-list').renderValues({list:travelArr},{
+                        getHref:getHref
+                    })
+					pages = data.pages;
+                })
+                currentPage = currentPage + 1;
+            }
+            query();
+
+            $(window).scroll(function () {
+                if ($(document).scrollTop()+$(window).height()+5>=$(document).height()){
+                    if (currentPage<=pages){
+                        query();
+                    }else {
+                        $(document).dialog({
+                            type : 'notice',
+                            infoText: '已经到达底部了',
+                            autoClose: 2500,
+                            position: 'bottom'  // center: 居中; bottom: 底部
+                        });
+                    }
+                }
+            });
+
+                $('#btn').click(function () {
+                    $('#commendModal').modal("show")
+                })
+
+            $('.btn-submit').click(function () {
+                $('#editForm').ajaxSubmit(function (data) {
+                    successAlert(data);
+                })
+            })
+        })
+	</script>
+</head>
+
+<body>
+<div id="pos38"></div>
+<header class="MfwHead">
+	<div class="LBtn">
+		<a class="btn back"
+		   href="/index.html"
+		   id="_j_top_history_back"><img src="/img/back.jpg" height="40px" width="40px"></a>
+	</div>
+	<div class="CBtn"><h1>网友问答</h1></div>
+	<div class="RBtn">
+	</div>
+</header>
+
+<section class="ans-list a-list">
+	<ul class="_j_pager_box"  render-loop="list">
+		<li>
+			<a id="pageView" data-href="/askComment.html?id=" render-key="list.id" render-fun="getHref">
+				<h2 render-html="list.problem"></h2>
+				<div class="clearfix">
+					<div class="user-img clearfix" data-uid="46376914">
+						<p>
+							<img render-src="list.user.headImgUrl">
+						</p>
+						<span render-html="list.user.nickName"></span>
+					</div>
+					<div class="ans-nr">
+						<div class="clearfix">
+							<div class="pic"><img render-src="list.coverUrl">
+							</div>
+							<p render-html="list.trouble">
+							</p>
+						</div>
+						<div class="clearfix">
+							<span class="fl-l " render-html="list.user.place"></span>
+							<span class="fl-r  dad" ><b
+									id="pageViews"  render-html="list.pageView"></b>浏览
+                                <b render-html="list.answerNum"></em></b><em>评论</em></span>
+						</div>
+					</div>
+				</div>
+			</a>
+		</li>
+	</ul>
+</section>
+<br/>
+<br/>
+<br/>
+
+<section class="askfoot">
+	<a href="javascript:;" id="btn" class="btn-que"><i></i>
+		我要提问
+	</a>
+
+</section>
+
+<div id="commendModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">提问</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal" action="/questions/saveOrUpdate.do" method="post" id="editForm" enctype="multipart/form-data">
+					<input type="hidden" name="id">
+					<div class="form-group">
+						<label for="problem" class="col-sm-3 control-label">问题：</label>
+						<div class="col-sm-6">
+							<input type="text" class="form-control" id="problem" name="problem" placeholder="请输入您的问题">
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="col-sm-3 control-label">图片：</label>
+						<div class="col-sm-6">
+							<img width="270px">
+							<input type="file" class="form-control" name="file">
+							<input type="hidden" class="form-control" name="coverUrl">
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="trouble" class="col-sm-3 control-label">具体说明：</label>
+						<div class="col-sm-6">
+							<input type="text" class="form-control" id="trouble" name="trouble" placeholder="请输入说明内容">
+						</div>
+					</div>
+				</form>
+			</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary btn-submit">保存</button>
+            </div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+</body>
+</html>

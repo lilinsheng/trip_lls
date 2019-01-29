@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wolfcode.trip.base.mapper.SignMapper">
+    <resultMap id="BaseResultMap" type="cn.wolfcode.trip.base.domain.Sign">
+        <id column="id" property="id"/>
+        <result column="user_id" property="user.id"/>
+        <result column="signTime" property="signTime"/>
+        <result column="signCount" property="signCount"/>
+        <result column="count" property="count"/>
+    </resultMap>
+    <delete id="deleteByPrimaryKey">
+    delete from sign
+    where id = #{id}
+  </delete>
+
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+    insert into sign (user_id, signTime, signCount, count)
+    values (#{user.id}, #{signTime}, #{signCount}, #{count})
+  </insert>
+    <update id="updateByPrimaryKey">
+    update sign
+    set
+      signCount = #{signCount}
+    where user_id = #{user.id}
+  </update>
+    <update id="updateByUserId" parameterType="user">
+        UPDATE user SET score=#{score}
+        WHERE id =#{id}
+    </update>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+    select id, user_id, signTime, signCount, count
+    from sign
+    where user_id = #{id}
+  </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+    select id, user_id, signTime, signCount, count
+    from sign
+  </select>
+
+    <select id="selectAllUserSign" resultMap="BaseResultMap">
+    select id, user_id, signTime, signCount, count
+    from sign
+    where user_id = #{id}
+    order by signTime DESC
+  </select>
+    <!--查询今天的数据-->
+    <select id="signByUserId" resultType="java.lang.Integer">
+    select COUNT(0) FROM sign where user_id = #{userId} and to_days(signTime) = to_days(now());
+  </select>
+    <!--查询昨天的签到-->
+    <select id="selectByUserId" resultType="java.lang.Integer">
+    SELECT count(0) FROM sign WHERE TO_DAYS( NOW( ) ) - TO_DAYS( signTime) = 1
+    AND user_id = #{userId}
+  </select>
+    <select id="getByUserId" resultType="user">
+        SELECT id,name,score FROM user
+        WHERE id=#{id}
+    </select>
+</mapper>

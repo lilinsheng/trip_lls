@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>消息</title>
+    <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" name="viewport">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="black" name="apple-mobile-web-app-status-bar-style">
+    <meta content="telephone=no" name="format-detection">
+    <script src="/js/jquery/jquery.min.js"></script>
+    <script src="/js/plugins/jrender/jrender.min.js"></script>
+    <link href="/css/css_likeHistory.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/js/plugins/dialog2/dialog.css"/>
+    <script src="/js/plugins/dialog2/dialog.min.js"></script>
+    <link rel="stylesheet" href="/css/font/css/font-awesome.min.css">
+    <style>
+        .dot {
+            color: red;
+        }
+    </style>
+
+</head>
+<body>
+<script>
+    $(function () {
+        // var authorId = JSON.parse(sessionStorage.getItem("user")).id;
+
+        $.get('/informs', function (data) {
+            console.log({list: data});
+            $(".userGood").renderValues({list: data}, {
+                getHref: function (item, value) {
+                    var inform = $(item).closest('.parent').data("inform");
+                    $(item).data("id",value);
+                    if(inform == 1){
+                        $(item).attr("href","/travelContent.html?id=" + value);
+                        $(item).find(".inform").html("你的游记已发布");
+                    }else if(inform == -1){
+                        $(item).attr("href","/travelContent.html?id=" + value);
+                        $(item).find(".inform").html("你的游记被拒绝发布");
+                    }else if(inform == 0){
+                        $(item).attr("href","/travelContent.html?id=" + value);
+                        $(item).find(".inform").html("你的游记已取消发布");
+                    }else if(inform == 2){
+                        $(item).attr("href","/strategyDetails.html?id=" + value);
+                        $(item).find(".inform").html("你的游记被推荐为攻略了!");
+                    }else if(inform == 3){
+                        $(item).attr("href","/strategyDetails.html?id=" + value);
+                        $(item).find(".inform").html("你的攻略被修改了!");
+                    }
+                }
+            });
+
+            // 点击时,把对应的数据状态改为0(已查看)
+            $('.delete').click(function () {
+                var inform = $(this).data("inform");
+                console.log(inform);
+                var id = $(this).find('a').data("id");
+                console.log(id);
+                $.ajax({
+                    url: '/informs',
+                    type: 'patch',
+                    data: {
+                        id: id,
+                        inform: inform
+                    }
+                });
+            });
+        });
+    });
+</script>
+<section class="aui-flexView">
+    <header class="aui-navBar aui-navBar-fixed b-line">
+        <a href="/mine/message.html" class="aui-navBar-item">
+            <i class="icon icon-return"></i>
+        </a>
+        <div class="aui-center">
+            <span class="aui-center-title">通知</span>
+        </div>
+        <a href="javascript:;" class="aui-navBar-item">
+        </a>
+    </header>
+    <section class="aui-scrollView userGood">
+        <div class="aui-list-box" render-loop="list">
+            <div render-attr="data-inform=list.inform"  class="parent delete">
+                <a render-attr="data-id=list.id" render-key="list.id" render-fun="getHref">
+                    <div class="aui-flex"  >
+                        <div class="aui-flex-logo">
+                            <img render-src="list.coverUrl" alt="">
+                        </div>
+                        <div class="aui-flex-box showContent">
+                            <h2>
+                                <span class="inform"></span><br/>
+                                <span style="font-size: 12px" render-html="list.title"></span>
+                                <span class="aui-flex-add" render-html="list.lastUpdateTime"></span>
+                            </h2>
+                        </div>
+                        </span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+</section>
+</body>
+</html>

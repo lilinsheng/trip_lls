@@ -1,0 +1,320 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>结伴 - 骡窝窝</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no,minimal-ui,viewport-fit=cover"/>
+    <meta name="copyright" content="Copyright (c) 2006-2018 Mafengwo."/>
+    <meta name="format-detection" content="telephone=no,address=no"/>
+    <meta name="referrer" content="always"/>
+    <script type="text/javascript">
+        window.Env = {
+            "CNZZID": 30081550,
+            "IS_MOBILE": true,
+            "WWW_HOST": "www.mafengwo.cn",
+            "IMG_HOST": "images.mafengwo.net",
+            "P_HOST": "passport.mafengwo.cn",
+            "P_HTTP": "https:\/\/passport.mafengwo.cn",
+            "PAGELET_HTTP": "https:\/\/pagelet.mafengwo.cn",
+            "JS_HOST": "js.mafengwo.net",
+            "UID": 0,
+            "CSTK": "fab2bb2ddc7c12ace0cd227ac4b880f6_164837132d9d971ba4f457afde242d82",
+            "GOOGLE_MAP_KEY": "AIzaSyD-Su0x_rPy1xehlMBcMyTqWkU49Bk53nQ",
+            "TONGJI_HOST": "tongji.mafengwo.cn"
+        };
+    </script>
+    <link href="css/mobile+css+ui^yvw^1526627473.css" rel="stylesheet" type="text/css"/>
+    <link href="css/bootstrap.css" rel="stylesheet" type="text/css"/>
+    <link href="css/bootstrap-treeview.css" rel="stylesheet" type="text/css"/>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap-treeview.js"></script>
+    <script src="js/jrender.min.js"></script>
+    <link rel="stylesheet" href="css/dialog.css">
+    <script src="js/dialog.min.js"></script>
+    <!--设置背景图片-->
+    <style>
+        body {
+            background: url("images/bg.jpg");
+            width: 100%;
+        }
+    </style>
+    <script>
+        $(function () {
+
+          /*  //定义起始的当前页为1
+            var currentPage = 1;
+            //定义总页数
+            var pages;
+            var travelData = [];
+            function getListFere() {
+                $.get("/feres/",{currentPage: currentPage},function (data) {
+                    $(".lists").renderValues(data, {
+                        getDays: function (item, value) {
+                            var value = value + '日游'
+                            $(item).html(value)
+                        }, getGoTime: function (item, value) {
+                            var value = value + '出发'
+                            $(item).html(value)
+                        }
+                    })
+                })
+            }
+            getListFere();//调用方法
+*/
+
+            $(function () {
+                //定义起始的当前页为1
+                var currentPage = 1;
+                //定义总页数
+                var pages;
+                var travelData = [];
+
+                function getList(name, timeinfo) {
+                    $.get("/feres/", {name: name, timeinfo: timeinfo, currentPage: currentPage}, function (data) {
+                        $(".lists").renderValues(data, {
+                            getDays: function (item, value) {
+                                var value = value + '日游'
+                                $(item).html(value)
+                            }, getGoTime: function (item, value) {
+                                var value = value + '出发'
+                                $(item).html(value)
+                            }
+                        })
+                    })
+                }
+
+
+                var timeinfo;
+                //根据时间段查询文章
+                $(".flr-drop-date li").each(function (index, ele) {
+                    $(ele).click(function (data) {
+                        timeinfo = $(this).data("timeinfo")
+                        if (timeinfo != "10000") {
+                            getList(name, timeinfo);
+                        } else {
+                            location.reload()
+                        }
+                    })
+                })
+                //选择地区查询文章
+                $.get("/regions/feres", function (data) {
+                    $('#treeview4').treeview({
+                        color: "#428bca",
+                        data: [{text: "全部地区", nodes: data}],
+                        showTags: true,
+                        lazyLoad: function (node) {
+                            $.get("/regions/feres", {parentId: node.id}, function (data) {
+                                $("#treeview4").treeview("addNode", [data, node]);
+                            });
+                        }, onNodeSelected: function (event, node) {
+                            var name = node.text
+                            if (name != "全部地区") {
+                                getList(name, timeinfo)
+                            } else {
+                                location.reload()
+                            }
+                        }
+                    });
+                });
+
+
+                function query() {
+
+                    //获取结伴的文章列表
+                    $.get("feres", {currentPage: currentPage}, function (data) {
+
+                        console.log(data);
+
+                        //将总页数设置给pages
+                        pages = data.pages;
+                        $.merge(travelData, data.list);
+                        var json = {
+                            list: travelData
+                        }
+                        $(".lists").renderValues(json,
+                            {
+                                getDays: function (item, value) {
+                                    var value = value + '日游'
+                                    $(item).html(value)
+                                }, getGoTime: function (item, value) {
+                                    var value = value + '出发'
+                                    $(item).html(value)
+                                }, getHref: function (item, value) {
+                                    var url = $(item).data('href');
+                                    $(item).attr('href', url + value)
+                                }
+                            })
+                    })
+
+                    currentPage++;
+                }
+
+                query();
+
+                $(window).scroll(function () {
+                    if ($(document).scrollTop() + $(window).height() >= $(document).height() - 10) {
+                        if (currentPage <= pages) {
+                            query();
+                        } else {
+                            $(document).dialog({
+                                type: 'notice',
+                                infoText: '已经到底了!',
+                                autoClose: 1500,
+                                position: 'center'  // center: 居中; bottom: 底部
+                            });
+                        }
+                    }
+                })
+
+                $("._j_not_login").click(function () {
+                    location.href = "/mine/editFere.html"
+                    //location.href = "/fereContent.html"
+                })
+
+                $.ajax({
+                    url: "http://www.tuling123.com/openapi/api",//接口地址
+                    type: "post",
+                    dataType: "json",
+                    data: {
+                        key: "",//APIKey
+                        info: userText//用户文本
+                    },
+                    success: function (data, status) {
+                        if (data.code == "100000") {//成功
+                            var robotText = data.text;//返回的文本信息
+                        }
+                    }
+                });
+
+            })
+
+
+
+
+
+
+
+        })
+
+    </script>
+</head>
+<body>
+<div id="pos38"></div>
+<header class="head2home">
+    <div class="rBtn">
+        <a href="/index.html" class="home">首页</a>
+    </div>
+</header>
+
+<link href="css/together.css" rel="stylesheet" type="text/css"/>
+<input id="_j_mdd_id" type="hidden" data-mddid="0"/>
+<input id="_j_all_mdd_num" type="hidden" data-num="2516"/>
+<input id="_j_more" type="hidden" data-more="1" data-flag="3"/>
+<section class="container" data-from="">
+
+    <!--目的地和出发时间-->
+    <div class="filter _j_fixed">
+       <!-- <div class="flr-item _j_mdd_filter">
+            <span>目的地</span>
+        </div>
+        <div class="flr-item _j_time_filter">
+            <span>全部出发时间</span>
+        </div>
+        <div class="flr-drop flr-drop-place _j_mdd " style="display: none;">
+            <div id="treeview4" class="treeview"><ul class="list-group"><li class="list-group-item node-treeview4" data-nodeid="0.0"><span class="icon expand-icon glyphicon glyphicon-minus"></span><span class="icon node-icon"></span>全部地区</li><li class="list-group-item node-treeview4" id="1" data-nodeid="0.0.0"><span class="indent"></span><span class="icon expand-icon glyphicon glyphicon-plus"></span><span class="icon node-icon"></span>亚洲<span class="badge">推荐</span></li><li class="list-group-item node-treeview4" id="2" data-nodeid="0.0.1"><span class="indent"></span><span class="icon expand-icon glyphicon glyphicon-plus"></span><span class="icon node-icon"></span>欧洲<span class="badge">推荐</span></li><li class="list-group-item node-treeview4" id="3" data-nodeid="0.0.2"><span class="indent"></span><span class="icon expand-icon glyphicon glyphicon-plus"></span><span class="icon node-icon"></span>北美洲<span class="badge">推荐</span></li><li class="list-group-item node-treeview4" id="12" data-nodeid="0.0.3"><span class="indent"></span><span class="icon expand-icon glyphicon glyphicon-plus"></span><span class="icon node-icon"></span>非洲<span class="badge">推荐</span></li><li class="list-group-item node-treeview4" id="14" data-nodeid="0.0.4"><span class="indent"></span><span class="icon expand-icon glyphicon glyphicon-plus"></span><span class="icon node-icon"></span>澳洲</li><li class="list-group-item node-treeview4" id="34" data-nodeid="0.0.5"><span class="indent"></span><span class="icon expand-icon glyphicon glyphicon-plus"></span><span class="icon node-icon"></span>南美洲</li><li class="list-group-item node-treeview4" id="35" data-nodeid="0.0.6"><span class="indent"></span><span class="icon expand-icon glyphicon glyphicon-plus"></span><span class="icon node-icon"></span>南极洲</li></ul></div>
+        </div>-->
+       <!-- <div class="flr-drop flr-drop-place _j_mdd ">
+            <div id="treeview4"></div>
+        </div>-->
+        <div class="flr-drop flr-drop-date _j_time">
+            <ul>
+                <li class="_j_time_select" data-timeflag="1" data-timeinfo="10000">全部出发时间<span
+                        class="num _j_num">2516</span></li>
+                <li class="_j_time_select" data-timeflag="2" data-timeinfo="1">今天<span class="num _j_num">25</span>
+                </li>
+                <li class="_j_time_select" data-timeflag="5" data-timeinfo="7">1周内<span
+                        class="num _j_num">418</span></li>
+                <li class="_j_time_select" data-timeflag="3" data-timeinfo="30">1个月内<span
+                        class="num _j_num">760</span></li>
+                <li class="_j_time_select" data-timeflag="4" data-timeinfo="93">1-3个月内<span
+                        class="num _j_num">1358</span></li>
+            </ul>
+        </div>
+    </div>
+
+
+    <div class="top-num">
+        <img width="100%" src="picture/topnum-bg.jpg">
+        <div class="vam">
+            <ul>
+                <li>
+                    <span><em>3801</em><br>个旅行计划</span>
+                    <span><em>413</em><br>人参与</span>
+                    <span><em>54</em><br>个目的地</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!--内容-->
+    <div>
+        <ul class="clearfix _j_together_list lists">
+            <div render-loop="list">
+                <li class="item" render-attr="data-id=list.id">
+                    <div data-href="/fereContent.html?fereId=" render-key="list.id" render-fun="getHref">
+                        <div class="cover">
+                            <img render-src="list.coverUrl">
+                            <div class="title">
+                                <h3 render-html="list.title"></h3>
+                                <span render-key="list.days" render-fun="getDays"></span>
+                            </div>
+                            <span class="departure-date" render-key="list.goTime" render-fun="getGoTime"></span>
+                        </div>
+                        <div class="info">
+                            <span class="avatar"><img render-src="list.user.headImgUrl"></span>
+                            <span class="gender male"></span>
+                            <span class="name" render-html="list.user.nickName"></span>
+                            <span class="location" render-html="list.user.sign"></span>
+                            <p class="txt" render-html="list.content"></p>
+                        </div>
+                    </div>
+                </li>
+
+            </div>
+        </ul>
+    </div>
+
+
+
+
+
+
+    <!-- <div class="loading _j_more_bnt" style="padding: 15px;text-align: center;font-size: 13px;color: #f39c11;">
+         加载更多
+     </div>-->
+    </div>
+    <div class="fixed-btm _j_sort_html">
+        <div class="btn-group">
+            <a class="btn-add _j_not_login">发起结伴</a>
+        </div>
+    </div>
+</section>
+<div class="overlay _j_overlay"></div>
+<script language="javascript" src="js/t_index.js" type="text/javascript" crossorigin="anonymous"></script>
+
+
+<script language="javascript" type="text/javascript">
+    if (typeof M !== "undefined" && typeof M.loadResource === "function") {
+        M.loadResource("https://js.mafengwo.net/js/cv/mobile+js+ALogin:js+ACnzzGaLog:js+ARecruit:js+ALazyLoad:mobile+js+wakeApp:mobile+js+omc.global^alE^1542198243.js");
+    }
+</script>
+<script>
+    $(function () {
+
+    })
+</script>
+</body>
+</html>
+
+

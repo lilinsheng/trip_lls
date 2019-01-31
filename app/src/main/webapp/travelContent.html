@@ -20,6 +20,13 @@
         var authorId;
         var user = JSON.parse(sessionStorage.getItem("user"));
 
+        //保存浏览记录
+        if (user.id){
+            $.ajax({
+                url:"/users/"+user.id+"/record/"+params.id,
+                type:"post"
+            })
+        }
 
         $(function () {
 

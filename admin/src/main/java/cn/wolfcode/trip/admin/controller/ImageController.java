@@ -1,5 +1,6 @@
 package cn.wolfcode.trip.admin.controller;
 
+import cn.wolfcode.trip.base.util.ALiYunUtil;
 import cn.wolfcode.trip.base.util.QiniuUtil;
 import cn.wolfcode.trip.base.util.UploadUtil;
 import org.springframework.stereotype.Controller;
@@ -21,7 +22,7 @@ public class ImageController {
     public Map upload(MultipartFile upload){
         Map<String,Object> map = new HashMap<>();
         try {
-            String url = QiniuUtil.QI_PATH+QiniuUtil.qiniuyunImage(upload);
+            String url = ALiYunUtil.upload(upload);
             map.put("uploaded",1);
             map.put("url",url);
         } catch (Exception e) {

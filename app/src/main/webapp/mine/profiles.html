@@ -11,6 +11,9 @@
     <link rel="stylesheet" href="/css/reset.css"/>
     <link rel="stylesheet" href="/css/myProfiles.css"/>
     <script src="/js/plugins/jrender/jrender.min.js"></script>
+    <script src="/js/jquery.bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/js/plugins/dialog2/dialog.css" />
+    <script src="/js/plugins/dialog2/dialog.min.js"></script>
 
     <script>
         var user = JSON.parse(sessionStorage.getItem("user"));
@@ -20,6 +23,28 @@
                 $('#score').renderValues(data)
             });
             $('.info').renderValues(user);
+
+            //每日签到
+            $(".dailySign").click(function () {
+                $.ajax({
+                    url:"/users/"+user.id+"/dailySign",
+                    type:"post",
+                    success:function (data) {
+                        var str
+                        if(data.success){
+                            str = "签到成功，本月签到:"+data.result+"次";
+                        }else {
+                            str = data.msg;
+                        }
+                        $(document).dialog({
+                            type : 'notice',
+                            infoText: str,
+                            autoClose: 2500,
+                            position: 'center'  // center: 居中; bottom: 底部
+                        });
+                    }
+                })
+            })
         })
     </script>
 
@@ -96,7 +121,10 @@
         <ul class="list-inline sign">
             <li class="list-inline-item"><i class="fa fa-calendar-check-o fa-2x"></i></li>
             <li class="list-inline-item">
-                <a href="/mine/sign.html">
+                <!--<a href="/mine/sign.html">
+                    <h7>每日签到</h7>
+                </a>-->
+                <a class="dailySign">
                     <h7>每日签到</h7>
                 </a>
                 <small id="dd">别忘了签到哦</small>
@@ -113,11 +141,9 @@
         <li><a href="#"><b><i class="fa fa-bullhorn fa-2x"></i></b><span>我的消息</span></a></li>
         <li><a href="/mine/indent.html"><b><i class="fa fa-file-text fa-2x"></i></b><span>我的订单</span></a></li>
         <li><a href="#"><b><i class="fa fa-briefcase fa-2x"></i></b><span>我的钱包</span></a></li>
-        <li><a href="/mine/friendster.html"><b><i class="fa fa-life-ring fa-spin fa-2x"></i></b><span>我的朋友圈</span></a>
-        </li>
-        <li><a href="/mine/shareMoments.html">
-            <b><i class="fa fa-pencil-square-o fa-2x">
-            </i></b><span>发表动态</span></a></li>
+        <li><a href="/mine/friendster.html"><b><i class="fa fa-life-ring fa-spin fa-2x"></i></b><span>我的朋友圈</span></a></li>
+        <li><a href="/mine/shareMoments.html"><b><i class="fa fa-pencil-square-o fa-2x"></i></b><span>发表动态</span></a></li>
+        <li><a href="/mine/record.html"><b><i class="fa fa-briefcase fa-2x"></i></b><span>浏览记录</span></a></li>
     </ul>
 </div>
 </body>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>浏览记录</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<link rel="stylesheet" href="/js/bootstrap-4.1.1-dist/css/bootstrap.min.css">
+		<script src="/js/jquery/jquery.min.js"></script>
+		<script src="/js/bootstrap-4.1.1-dist/js/bootstrap.min.js"></script>
+		<script src="/js/plugins/jrender/jrender.min.js"></script>
+		<link rel="stylesheet" href="/css/font/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="/css/reset.css" />
+		<link rel="stylesheet" href="/css/userTravels.css" />
+		<link rel="stylesheet" href="/js/plugins/dialog2/dialog.css" />
+		<script src="/js/plugins/dialog2/dialog.min.js"></script>
+
+		<script>
+			var user = JSON.parse(sessionStorage.getItem('user'));
+
+			//当前页
+			var currentPage = 1;
+
+			//最大页数
+			var pages;
+
+			//合并游记数组
+			var travelArr = [];
+
+			$(function () {
+                query();
+
+                $(window).scroll(function () {
+				    if ($(document).scrollTop()+$(window).height()>=$(document).height()){
+                        if (currentPage<=pages){
+                            console.log($(document).scrollTop() + $(window).height());
+                            console.log($(document).height());
+                            query();
+                        }else {
+                            $(document).dialog({
+                                type : 'notice',
+                                infoText: '已经到达底部了',
+                                autoClose: 2500,
+                                position: 'bottom'  // center: 居中; bottom: 底部
+                            });
+						}
+                    }
+
+
+                });
+
+
+            });
+
+
+
+
+			function query() {
+                $.get('/users/'+user.id+'/records',{currentPage:currentPage},function (data) {
+                    //合并数组
+                    $.merge(travelArr,data);
+                    console.log(travelArr);
+                    $('.travels').renderValues({"list":travelArr},{
+                        'getHref':function (item, value) {
+                            $(item).attr("href","/travelContent.html?id="+value);
+                        }
+					});
+                    pages=data.pages;
+                });
+                currentPage = currentPage + 1;
+            }
+
+		</script>
+
+	</head>
+
+	<body>
+	<div class="search-head">
+		<div class="row nav-search">
+			<div class="col">
+				<a href="profiles.html">
+					<span><i class="fa fa-chevron-left"></i></span>
+				</a>
+			</div>
+			<div class="col">
+				<span>我的游记</span>
+			</div>
+			<div class="col"></div>
+		</div>
+	</div>
+
+
+	<div class="container travels">
+		<dl class="list" render-loop="list"><dd>
+
+			<a href="javascript:;" render-fun="getHref" render-key="list.id">
+				<img render-src="list.coverUrl">
+				<h6 class="title" render-html="list.title"></h6>
+				<p>最近更新时间 <span render-html="list.lastUpdateTime"></span>
+					<span class="span-right">
+							  <i class="fa fa-heart"></i><span>0</span>收藏
+						  <i class="fa fa-thumbs-o-up"></i><span>0</span>点赞</span>
+				</p>
+			</a>
+		</dd>
+		</dl>
+	</div>
+
+	</body>
+</html>

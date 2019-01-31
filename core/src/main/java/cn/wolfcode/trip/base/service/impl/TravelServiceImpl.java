@@ -8,12 +8,16 @@ import cn.wolfcode.trip.base.mapper.TravelMapper;
 import cn.wolfcode.trip.base.query.QueryObject;
 import cn.wolfcode.trip.base.query.TravelQueryObject;
 import cn.wolfcode.trip.base.service.ITravelService;
+import cn.wolfcode.trip.base.util.RedisConstant;
 import cn.wolfcode.trip.base.util.UserContext;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -21,6 +25,8 @@ import java.util.List;
 public class TravelServiceImpl implements ITravelService {
     @Autowired
     private TravelMapper travelMapper;
+    @Autowired
+    private RedisTemplate redisTemplate;
     @Autowired
     private TravelContentMapper travelContentMapper;
 
@@ -151,6 +157,20 @@ public class TravelServiceImpl implements ITravelService {
     @Override
     public List<Travel> selectAlltravel() {
         return travelMapper.selectAlltravel();
+    }
+
+    @Override
+    public List<Travel> queryTravelReord(Long userId, QueryObject qo) {
+        String key = MessageFormat.format(RedisConstant.TRAVEL_BROWSE,userId);
+        int start = qo.getStart();
+        int end = start+qo.getPageSize()-1;
+        List<Long> range = redisTemplate.opsForList().range(key, start, end);
+        List<Travel> list = new ArrayList<>();
+        for (Long travelId : range) {
+            Travel travel = travelMapper.selectByPrimaryKey(travelId);
+            list.add(travel);
+        }
+        return list;
     }
 
 }

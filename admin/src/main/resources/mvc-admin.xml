@@ -9,6 +9,7 @@
 
 
         <import resource="classpath:applicationContext.xml"/>
+        <import resource="classpath:redis.xml"/>
         <context:component-scan base-package="cn.wolfcode.trip.admin"/>
 
         <mvc:annotation-driven/>

@@ -1,5 +1,6 @@
 package cn.wolfcode.trip.app.controller;
 
+import cn.wolfcode.trip.base.util.ALiYunUtil;
 import cn.wolfcode.trip.base.util.QiniuUtil;
 import cn.wolfcode.trip.base.util.UploadUtil;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +25,7 @@ public class ImageController {
     public Map upload(MultipartFile file){
         Map<String,Object> map = new HashMap<>();
         try {
-            String url = QiniuUtil.QI_PATH+QiniuUtil.qiniuyunImage(file);
+            String url = ALiYunUtil.upload(file);
             map.put("status",1);
             map.put("url",url);
         } catch (Exception e) {

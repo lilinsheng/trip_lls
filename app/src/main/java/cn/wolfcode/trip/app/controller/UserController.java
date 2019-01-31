@@ -1,6 +1,8 @@
 package cn.wolfcode.trip.app.controller;
 
+import cn.wolfcode.trip.base.domain.Travel;
 import cn.wolfcode.trip.base.domain.User;
+import cn.wolfcode.trip.base.query.QueryObject;
 import cn.wolfcode.trip.base.query.StrategyCommentQueryObject;
 import cn.wolfcode.trip.base.query.StrategyCommentsQueryObject;
 import cn.wolfcode.trip.base.query.TravelQueryObject;
@@ -12,6 +14,7 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -193,4 +196,38 @@ public class UserController {
     public User getUserByEmail(@PathVariable String email){
         return userService.getUserByEmail(email);
     }
+
+    /**
+     * 签到
+     */
+    @PostMapping("/{userId}/dailySign")
+    public JsonResult dailySign(@PathVariable("userId") Long userId){
+        JsonResult result = new JsonResult();
+        try {
+            int monthCount = userService.dailySign(userId);
+            result.setResult(monthCount);
+        }catch (Exception e){
+            e.printStackTrace();
+            result.mark(e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * 保存浏览记录
+     */
+    @PostMapping("/{userId}/record/{travelId}")
+    public void browse(@PathVariable("userId")Long userId,@PathVariable("travelId")Long travelId){
+        userService.browse(userId,travelId);
+    }
+
+    /**
+     * 浏览记录
+     */
+    @GetMapping("/{userId}/records")
+    public List record(@PathVariable("userId")Long userId, QueryObject qo){
+        List<Travel> list = travelService.queryTravelReord(userId,qo);
+        return list;
+    }
+
 }

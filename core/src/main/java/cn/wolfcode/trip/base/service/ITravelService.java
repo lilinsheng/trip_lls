@@ -92,4 +92,8 @@ public interface ITravelService {
      */
     List<Travel> selectAlltravel();
 
+    /**
+     * 分页查询浏览记录
+     */
+    List<Travel> queryTravelReord(Long userId, QueryObject qo);
 }

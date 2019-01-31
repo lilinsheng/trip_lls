@@ -8,18 +8,27 @@ import cn.wolfcode.trip.base.query.QueryObject;
 import cn.wolfcode.trip.base.query.TravelQueryObject;
 import cn.wolfcode.trip.base.query.UserQueryObject;
 import cn.wolfcode.trip.base.service.IUserService;
+import cn.wolfcode.trip.base.util.RedisConstant;
 import cn.wolfcode.trip.base.util.UserContext;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class UserServiceImpl implements IUserService {
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Override
     public void register(String nickName, String email, String password) {
@@ -153,6 +162,44 @@ public class UserServiceImpl implements IUserService {
     @Override
     public List<User> getAllInsteres(Long userId) {
         return userMapper.selectInsteres(userId);
+    }
+
+    @Override
+    public int dailySign(Long userId) {
+        SimpleDateFormat f = new SimpleDateFormat("YYYYMMDD");
+        Date date = new Date();
+        String dateString = f.format(date);
+        String key = MessageFormat.format(RedisConstant.daily,dateString);
+        Boolean bit = redisTemplate.opsForValue().getBit(key, userId);
+        if (bit == true){
+            throw new RuntimeException("今日已签到");
+        }
+        redisTemplate.opsForValue().setBit(key,userId,true);
+        SimpleDateFormat fm = new SimpleDateFormat("YYYYMM");
+        String ymString = fm.format(date);
+        String monthSignKey = MessageFormat.format(RedisConstant.monthSighCount,ymString);
+        Integer num = (Integer) redisTemplate.opsForHash().get(monthSignKey, userId);
+        if (num ==null){
+            num = 0;
+        }
+        num++;
+        redisTemplate.opsForHash().put(monthSignKey,userId,num);
+        return num;
+    }
+
+    @Override
+    public void browse(Long userId, Long travelId) {
+        String key = MessageFormat.format(RedisConstant.TRAVEL_BROWSE,userId);
+        //先移除队列中的数据
+        redisTemplate.opsForList().remove(key,1,travelId);
+        redisTemplate.opsForList().leftPush(key,travelId);
+        redisTemplate.opsForList().trim(key,0,100);
+        //失效时间
+        redisTemplate.expire(key,30, TimeUnit.DAYS);
+//        List list = redisTemplate.opsForList().range(key, 0, 10);
+//        for (Object o : list) {
+//            System.out.println(o);
+//        }
     }
 
 }

@@ -113,4 +113,14 @@ public interface IUserService {
     User getUserByEmail(String email);
 
     List<User> getAllInsteres(Long userId);
+
+    /**
+     * 每日签到
+     */
+    int dailySign(Long userId);
+
+    /**
+     * 保存浏览记录
+     */
+    void browse(Long userId, Long travelId);
 }
